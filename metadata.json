@@ -1,0 +1,6 @@
+{
+  "name": "Next Border - IELTS & Leads Portal",
+  "description": "Next Border Visa Consultancy dashboard for IELTS mock test evaluation, student leads, and WhatsApp/email result dispatch with liquid glassmorphism and swimming Koi fish pond.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
