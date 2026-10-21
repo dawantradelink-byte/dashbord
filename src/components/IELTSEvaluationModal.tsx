@@ -18,11 +18,13 @@ import {
   User,
   Share2,
   Clock,
-  AlertCircle
+  AlertCircle,
+  Calculator
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { Lead, IELTSScoreBreakdown, LeadStatus } from '../types';
 import { NextBorderLogo } from './NextBorderLogo';
+import { IELTSBandCalculator } from './IELTSBandCalculator';
 import { calculateIELTSOverall, getIELTSCefr } from '../utils/ieltsAudit';
 
 interface IELTSEvaluationModalProps {
@@ -57,6 +59,7 @@ export const IELTSEvaluationModal: React.FC<IELTSEvaluationModalProps> = ({
   const [speaking, setSpeaking] = useState<number>(defaultScores.speaking);
   const [notes, setNotes] = useState<string>(defaultScores.examinerNotes);
   const [currentStatus, setCurrentStatus] = useState<LeadStatus>(lead.status || 'Pending Evaluation');
+  const [showRawCalculator, setShowRawCalculator] = useState<boolean>(false);
   
   // Explicit confirmation state for result transmission
   const [pendingConfirmation, setPendingConfirmation] = useState<{
@@ -376,6 +379,38 @@ export const IELTSEvaluationModal: React.FC<IELTSEvaluationModalProps> = ({
                 </div>
               </div>
             </div>
+
+            {/* Quick Button to Open Raw-to-Band Calculator */}
+            <button
+              type="button"
+              onClick={() => setShowRawCalculator(!showRawCalculator)}
+              className={`w-full mt-2.5 flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-xl border text-xs font-medium transition-all ${
+                showRawCalculator
+                  ? 'bg-rose-600/80 text-white border-rose-400 shadow-sm'
+                  : 'bg-black/40 hover:bg-white/10 text-rose-200 border-white/15'
+              }`}
+            >
+              <Calculator className="w-3.5 h-3.5 text-amber-300" />
+              <span>{showRawCalculator ? 'Hide Raw Score Calculator' : 'Convert Raw Answers to Band Scores'}</span>
+            </button>
+
+            {showRawCalculator && (
+              <div className="mt-3">
+                <IELTSBandCalculator
+                  initialTestType={lead.ieltsData?.testType === 'General Training' ? 'General Training' : 'Academic'}
+                  initialListeningRaw={lead.ieltsData?.rawListeningScore || 34}
+                  initialReadingRaw={lead.ieltsData?.rawReadingScore || 33}
+                  initialWritingBand={writing}
+                  initialSpeakingBand={speaking}
+                  onApplyScores={(result) => {
+                    setListening(result.listeningBand);
+                    setReading(result.readingBand);
+                    setWriting(result.writingBand);
+                    setSpeaking(result.speakingBand);
+                  }}
+                />
+              </div>
+            )}
           </div>
 
           {/* Right Column: Band Score Calculator & Actions */}

@@ -14,7 +14,7 @@ class WaterAudioEngine {
   private filter2: BiquadFilterNode | null = null;
   private lfo: OscillatorNode | null = null;
   private droneOscs: OscillatorNode[] = [];
-  private volume: number = 0.4;
+  private volume: number = 0.85;
 
   private initContext() {
     if (!this.ctx) {
@@ -39,7 +39,7 @@ class WaterAudioEngine {
         // Brown/Pink filter
         output[i] = (lastOut + (0.02 * white)) / 1.02;
         lastOut = output[i];
-        output[i] *= 3.5; // Gain boost
+        output[i] *= 5.2; // High acoustic clarity gain boost
       }
     }
     return buffer;
@@ -66,24 +66,24 @@ class WaterAudioEngine {
 
       this.filter1 = ctx.createBiquadFilter();
       this.filter1.type = 'bandpass';
-      this.filter1.frequency.setValueAtTime(320, ctx.currentTime);
-      this.filter1.Q.setValueAtTime(1.8, ctx.currentTime);
+      this.filter1.frequency.setValueAtTime(360, ctx.currentTime);
+      this.filter1.Q.setValueAtTime(1.6, ctx.currentTime);
 
       this.filter2 = ctx.createBiquadFilter();
       this.filter2.type = 'lowpass';
-      this.filter2.frequency.setValueAtTime(650, ctx.currentTime);
+      this.filter2.frequency.setValueAtTime(750, ctx.currentTime);
 
       // Gentle LFO to modulate stream current like natural gentle water
       this.lfo = ctx.createOscillator();
       this.lfo.frequency.setValueAtTime(0.25, ctx.currentTime);
       const lfoGain = ctx.createGain();
-      lfoGain.gain.setValueAtTime(90, ctx.currentTime);
+      lfoGain.gain.setValueAtTime(120, ctx.currentTime);
       this.lfo.connect(lfoGain);
       lfoGain.connect(this.filter1.frequency);
       this.lfo.start();
 
       this.streamGain = ctx.createGain();
-      this.streamGain.gain.setValueAtTime(0.35, ctx.currentTime);
+      this.streamGain.gain.setValueAtTime(0.70, ctx.currentTime);
 
       this.noiseNode.connect(this.filter1);
       this.filter1.connect(this.filter2);
@@ -93,7 +93,7 @@ class WaterAudioEngine {
 
       // 2. Zen Harmonic Tone (432 Hz warm singing bowl harmonic chord)
       this.droneGain = ctx.createGain();
-      this.droneGain.gain.setValueAtTime(0.08, ctx.currentTime);
+      this.droneGain.gain.setValueAtTime(0.18, ctx.currentTime);
       this.droneGain.connect(this.masterGain);
 
       const freqs = [216, 324, 432, 648]; // Harmonic serene ratios
@@ -187,8 +187,8 @@ class WaterAudioEngine {
       osc.frequency.setValueAtTime(startFreq, now);
       osc.frequency.exponentialRampToValueAtTime(endFreq, now + 0.12);
 
-      dropGain.gain.setValueAtTime(0.12 * this.volume, now);
-      dropGain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+      dropGain.gain.setValueAtTime(0.32 * this.volume, now);
+      dropGain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
 
       osc.connect(dropGain);
       dropGain.connect(ctx.destination);

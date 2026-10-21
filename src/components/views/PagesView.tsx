@@ -6,35 +6,37 @@ import {
   Eye, 
   Clock, 
   CheckCircle2, 
-  Edit3, 
   Globe, 
   FileCode2,
-  Sparkles
+  AlertCircle
 } from 'lucide-react';
+import { storageService } from '../../services/storageService';
 
 interface PagesViewProps {
   language: 'en' | 'bn';
+  onNavigateToRoute?: (path: string) => void;
 }
 
 interface WebPageRecord {
   id: string;
   title: string;
   path: string;
-  status: 'Live' | 'Draft' | 'Scheduled';
+  status: 'Live' | 'Draft' | 'Configured';
   lastUpdated: string;
-  views: number;
   description: string;
 }
 
-export const PagesView: React.FC<PagesViewProps> = ({ language }) => {
-  const [pages, setPages] = useState<WebPageRecord[]>([
+export const PagesView: React.FC<PagesViewProps> = ({ language, onNavigateToRoute }) => {
+  const analytics = storageService.getAnalytics();
+  const isGAConnected = analytics.isGoogleAnalyticsConnected;
+
+  const [pages] = useState<WebPageRecord[]>([
     {
       id: 'p1',
       title: 'Next Border Main Portal',
       path: '/',
       status: 'Live',
       lastUpdated: '19 Oct 2026',
-      views: 48920,
       description: 'Landing page, consultancy credentials, and lead generation forms.'
     },
     {
@@ -43,43 +45,38 @@ export const PagesView: React.FC<PagesViewProps> = ({ language }) => {
       path: '/ielts-practice',
       status: 'Live',
       lastUpdated: '19 Oct 2026',
-      views: 34100,
       description: 'Calm student mock test environment with live timers, audio, and essay submission.'
     },
     {
       id: 'p3',
       title: 'USA F-1 Visa Comprehensive Portal',
       path: '/visa-usa',
-      status: 'Live',
+      status: 'Configured',
       lastUpdated: '16 Oct 2026',
-      views: 18450,
       description: 'I-20 guidelines, embassy interview preparation, and SEVIS assistance.'
     },
     {
       id: 'p4',
       title: 'Canada SDS & Study Permit Guide',
       path: '/canada-sds',
-      status: 'Live',
+      status: 'Configured',
       lastUpdated: '15 Oct 2026',
-      views: 22100,
       description: 'GIC setup, designated learning institutions, and language requirements.'
     },
     {
       id: 'p5',
       title: 'UK University Admissions & CAS',
       path: '/uk-admissions',
-      status: 'Live',
+      status: 'Configured',
       lastUpdated: '14 Oct 2026',
-      views: 12900,
       description: 'Undergraduate and postgraduate scholarship pathways.'
     },
     {
       id: 'p6',
       title: 'Privacy Policy & Terms of Service',
       path: '/privacy',
-      status: 'Live',
+      status: 'Configured',
       lastUpdated: '01 Oct 2026',
-      views: 3400,
       description: 'Data protection and candidate privacy standards.'
     }
   ]);
@@ -114,7 +111,7 @@ export const PagesView: React.FC<PagesViewProps> = ({ language }) => {
 
         <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 text-xs text-rose-200 font-mono">
           <Globe className="w-3.5 h-3.5 text-rose-400" />
-          <span>{pages.length} Published Routes</span>
+          <span>{pages.length} Registered Routes</span>
         </div>
       </div>
 
@@ -128,50 +125,64 @@ export const PagesView: React.FC<PagesViewProps> = ({ language }) => {
                 <th className="py-4 px-4">Route Path</th>
                 <th className="py-4 px-4">Status</th>
                 <th className="py-4 px-4">Last Updated</th>
-                <th className="py-4 px-4">Views</th>
-                <th className="py-4 px-4 text-right">Actions</th>
+                <th className="py-4 px-4">Traffic Telemetry</th>
+                <th className="py-4 px-4 text-right">Route Type</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
-              {pages.map((p) => (
-                <tr key={p.id} className="hover:bg-white/[0.04] transition-colors">
-                  <td className="py-4 px-4 max-w-sm">
-                    <div className="font-bold text-white text-sm">{p.title}</div>
-                    <p className="text-rose-200/70 text-[11px] mt-0.5">{p.description}</p>
-                  </td>
-                  <td className="py-4 px-4 font-mono text-rose-300">
-                    <span className="px-2.5 py-1 rounded-lg bg-black/40 border border-white/10">
-                      {p.path}
-                    </span>
-                  </td>
-                  <td className="py-4 px-4">
-                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 text-[10px] font-bold">
-                      <CheckCircle2 className="w-3 h-3" />
-                      {p.status}
-                    </span>
-                  </td>
-                  <td className="py-4 px-4 font-mono text-rose-300/80 text-[11px]">
-                    {p.lastUpdated}
-                  </td>
-                  <td className="py-4 px-4 font-mono text-white text-xs">
-                    <div className="flex items-center gap-1.5">
-                      <Eye className="w-3.5 h-3.5 text-rose-400" />
-                      <span>{p.views.toLocaleString()}</span>
-                    </div>
-                  </td>
-                  <td className="py-4 px-4 text-right">
-                    <a
-                      href="https://motionsites.ai/"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-rose-300 hover:text-white transition-colors"
-                    >
-                      <ExternalLink className="w-3.5 h-3.5" />
-                      <span>Preview</span>
-                    </a>
-                  </td>
-                </tr>
-              ))}
+              {pages.map((p) => {
+                const liveMatch = isGAConnected 
+                  ? analytics.topPagesLive.find(tp => tp.path === p.path)
+                  : null;
+
+                return (
+                  <tr key={p.id} className="hover:bg-white/[0.04] transition-colors">
+                    <td className="py-4 px-4 max-w-sm">
+                      <div className="font-bold text-white text-sm">{p.title}</div>
+                      <p className="text-rose-200/70 text-[11px] mt-0.5">{p.description}</p>
+                    </td>
+                    <td className="py-4 px-4 font-mono text-rose-300">
+                      <span className="px-2.5 py-1 rounded-lg bg-black/40 border border-white/10">
+                        {p.path}
+                      </span>
+                    </td>
+                    <td className="py-4 px-4">
+                      <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
+                        p.status === 'Live'
+                          ? 'bg-emerald-500/20 text-emerald-300 border-emerald-400/30'
+                          : 'bg-rose-950/60 text-rose-300 border-rose-500/30'
+                      }`}>
+                        <CheckCircle2 className="w-3 h-3" />
+                        {p.status}
+                      </span>
+                    </td>
+                    <td className="py-4 px-4 font-mono text-rose-300/80 text-[11px]">
+                      {p.lastUpdated}
+                    </td>
+                    <td className="py-4 px-4 font-mono text-xs">
+                      {liveMatch ? (
+                        <div className="flex items-center gap-1.5 text-white">
+                          <Eye className="w-3.5 h-3.5 text-rose-400" />
+                          <span>{liveMatch.views.toLocaleString()}</span>
+                        </div>
+                      ) : isGAConnected ? (
+                        <span className="text-rose-300/60 text-[11px]">0 live hits</span>
+                      ) : (
+                        <span className="text-rose-300/50 text-[11px] flex items-center gap-1">
+                          <AlertCircle className="w-3 h-3 text-amber-400/70" />
+                          <span>GA4 Unconnected</span>
+                        </span>
+                      )}
+                    </td>
+                    <td className="py-4 px-4 text-right">
+                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white/5 text-rose-300 font-mono text-[10px]">
+                        <FileCode2 className="w-3 h-3 text-rose-400" />
+                        <span>Next Border Route</span>
+                      </span>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

@@ -9,7 +9,8 @@ import {
   convertAcademicReadingRawToBand,
   convertGeneralReadingRawToBand,
   auditStudentHistory,
-  runFullIELTSAudit
+  runFullIELTSAudit,
+  getRawScoreBandDetail
 } from '../src/utils/ieltsAudit.js';
 
 test('IELTS Overall Rounding Rule verification according to Cambridge/IDP specification', () => {
@@ -73,6 +74,36 @@ test('Raw Score Conversion Tables (40 questions)', () => {
   assert.equal(convertGeneralReadingRawToBand(30), 6.0);
 });
 
+test('Distinguish Academic Reading from General Training Reading official conversion tables', () => {
+  // Raw score of 30/40:
+  // In Academic Reading: 30 is Band 7.0
+  // In General Training Reading: 30 is Band 6.0 (General requires higher raw score)
+  const rawScore = 30;
+  const academicBand = convertAcademicReadingRawToBand(rawScore);
+  const generalBand = convertGeneralReadingRawToBand(rawScore);
+
+  assert.equal(academicBand, 7.0);
+  assert.equal(generalBand, 6.0);
+  assert.notEqual(academicBand, generalBand);
+
+  // Raw score of 34/40:
+  // Academic gives Band 7.5
+  // General gives Band 7.0
+  assert.equal(convertAcademicReadingRawToBand(34), 7.5);
+  assert.equal(convertGeneralReadingRawToBand(34), 7.0);
+});
+
+test('Boundary cases and extreme input resilience', () => {
+  // Minimum official scores
+  assert.equal(calculateIELTSOverall(0, 0, 0, 0), 0.0);
+  // Maximum official scores
+  assert.equal(calculateIELTSOverall(9, 9, 9, 9), 9.0);
+  // Mixed boundaries
+  assert.equal(calculateIELTSOverall(9, 0, 9, 0), 4.5);
+  // Clamping of out-of-range values
+  assert.equal(calculateIELTSOverall(-5, 12, 6.5, 6.5), 5.5); // clamped to 0, 9, 6.5, 6.5 -> avg 5.5
+});
+
 test('Honest empty state handling when no records exist', () => {
   const audit = runFullIELTSAudit([]);
   assert.equal(audit.totalTestsAudited, 0);
@@ -80,3 +111,36 @@ test('Honest empty state handling when no records exist', () => {
   assert.equal(audit.averageOverallBand, null);
   assert.equal(audit.averageImprovement, null);
 });
+
+test('Real-time raw score calculation detail and next-band gap calculation', () => {
+  // Listening: raw 30 gives Band 7.0 (Bracket: 30-31), next band 7.5 requires 32 (gap = 2)
+  const lDetail = getRawScoreBandDetail(30, 'listening');
+  assert.equal(lDetail.band, 7.0);
+  assert.equal(lDetail.minRawForCurrentBand, 30);
+  assert.equal(lDetail.maxRawForCurrentBand, 31);
+  assert.equal(lDetail.nextBand, 7.5);
+  assert.equal(lDetail.neededForNextBand, 2);
+
+  // Academic Reading: raw 34 gives Band 7.5 (Bracket: 33-34), next band 8.0 requires 35 (gap = 1)
+  const arDetail = getRawScoreBandDetail(34, 'academicReading');
+  assert.equal(arDetail.band, 7.5);
+  assert.equal(arDetail.minRawForCurrentBand, 33);
+  assert.equal(arDetail.maxRawForCurrentBand, 34);
+  assert.equal(arDetail.nextBand, 8.0);
+  assert.equal(arDetail.neededForNextBand, 1);
+
+  // General Training Reading: raw 30 gives Band 6.0 (Bracket: 30-31), next band 6.5 requires 32 (gap = 2)
+  const gtDetail = getRawScoreBandDetail(30, 'generalReading');
+  assert.equal(gtDetail.band, 6.0);
+  assert.equal(gtDetail.minRawForCurrentBand, 30);
+  assert.equal(gtDetail.maxRawForCurrentBand, 31);
+  assert.equal(gtDetail.nextBand, 6.5);
+  assert.equal(gtDetail.neededForNextBand, 2);
+
+  // Max score boundary: 40/40 gives Band 9.0, no next band
+  const maxDetail = getRawScoreBandDetail(40, 'listening');
+  assert.equal(maxDetail.band, 9.0);
+  assert.equal(maxDetail.nextBand, null);
+  assert.equal(maxDetail.neededForNextBand, null);
+});
+

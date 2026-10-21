@@ -127,6 +127,69 @@ export const convertGeneralReadingRawToBand = (raw: number): number => {
   return 2.0;
 };
 
+export interface RawScoreConversionDetail {
+  rawScore: number;
+  maxScore: number;
+  band: number;
+  cefr: string;
+  minRawForCurrentBand: number;
+  maxRawForCurrentBand: number;
+  nextBand: number | null;
+  neededForNextBand: number | null;
+}
+
+/**
+ * Calculates detailed band conversion metadata, score brackets, and gap to next band
+ */
+export const getRawScoreBandDetail = (
+  raw: number,
+  module: 'listening' | 'academicReading' | 'generalReading'
+): RawScoreConversionDetail => {
+  const safeRaw = Math.max(0, Math.min(40, Math.round(Number(raw) || 0)));
+  const converter =
+    module === 'listening'
+      ? convertListeningRawToBand
+      : module === 'academicReading'
+      ? convertAcademicReadingRawToBand
+      : convertGeneralReadingRawToBand;
+
+  const currentBand = converter(safeRaw);
+  const cefr = getIELTSCefr(currentBand);
+
+  let minRaw = safeRaw;
+  while (minRaw > 0 && converter(minRaw - 1) === currentBand) {
+    minRaw--;
+  }
+
+  let maxRaw = safeRaw;
+  while (maxRaw < 40 && converter(maxRaw + 1) === currentBand) {
+    maxRaw++;
+  }
+
+  let nextBand: number | null = null;
+  let neededForNextBand: number | null = null;
+
+  for (let r = safeRaw + 1; r <= 40; r++) {
+    const b = converter(r);
+    if (b > currentBand) {
+      nextBand = b;
+      neededForNextBand = r - safeRaw;
+      break;
+    }
+  }
+
+  return {
+    rawScore: safeRaw,
+    maxScore: 40,
+    band: currentBand,
+    cefr,
+    minRawForCurrentBand: minRaw,
+    maxRawForCurrentBand: maxRaw,
+    nextBand,
+    neededForNextBand
+  };
+};
+
 export const countWords = (text?: string): number => {
   if (!text) return 0;
   return text.trim().split(/\s+/).filter(Boolean).length;

@@ -14,10 +14,12 @@ import {
   ChevronRight,
   ExternalLink,
   GraduationCap,
-  Plus
+  Plus,
+  Calculator
 } from 'lucide-react';
 import { Lead, LeadStatus, IELTSMockTestHistoryEntry } from '../../types';
 import { IELTSPerformanceProgressionChart } from '../IELTSPerformanceProgressionChart';
+import { IELTSBandCalculator } from '../IELTSBandCalculator';
 import { countWords } from '../../utils/ieltsAudit';
 
 interface IELTSMockViewProps {
@@ -39,6 +41,7 @@ export const IELTSMockView: React.FC<IELTSMockViewProps> = ({
 }) => {
   const [selectedStatusTab, setSelectedStatusTab] = useState<string>('All');
   const [viewMode, setViewMode] = useState<'both' | 'chart_only' | 'cards_only'>('both');
+  const [showCalculator, setShowCalculator] = useState<boolean>(false);
 
   // Filter only IELTS Mock Test leads
   const ieltsLeads = leads.filter((l) => l.type === 'IELTS Mock Test');
@@ -99,6 +102,19 @@ export const IELTSMockView: React.FC<IELTSMockViewProps> = ({
 
         <div className="flex items-center gap-3">
           <button
+            onClick={() => setShowCalculator(!showCalculator)}
+            className={`flex items-center gap-2 px-3.5 py-2.5 rounded-xl border text-xs font-semibold transition-all shadow-sm ${
+              showCalculator
+                ? 'bg-rose-600 text-white border-rose-400 shadow-rose-950/40'
+                : 'bg-black/30 hover:bg-white/10 text-rose-200 border-white/15'
+            }`}
+            title="Official Cambridge/IDP Raw to Band Conversion Calculator"
+          >
+            <Calculator className="w-4 h-4" />
+            <span>{language === 'en' ? 'Raw Score Calculator' : 'র স্কোর ক্যালকুলেটর'}</span>
+          </button>
+
+          <button
             onClick={onOpenZenTestMode}
             className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-rose-600 to-amber-600 hover:from-rose-500 hover:to-amber-500 text-white font-semibold text-xs shadow-lg shadow-rose-950/40 transition-all hover:scale-105"
           >
@@ -107,6 +123,11 @@ export const IELTSMockView: React.FC<IELTSMockViewProps> = ({
           </button>
         </div>
       </div>
+
+      {/* Official IELTS Band Calculator Component (Real-time Raw-to-Band Scoring) */}
+      {showCalculator && (
+        <IELTSBandCalculator language={language} />
+      )}
 
       {/* Pipeline Status Counters */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">

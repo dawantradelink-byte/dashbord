@@ -15,8 +15,9 @@ import { ConfirmDeleteModal } from './components/ConfirmDeleteModal';
 import { ZenTestTakerView } from './components/ZenTestTakerView';
 import { MotionDock } from './components/MotionDock';
 import { MotionSitesModal, MotionTheme } from './components/MotionSitesModal';
-import { KoiPondControlsPanel } from './components/KoiPondControlsPanel';
 import { ToastContainer, ToastMessage } from './components/Toast';
+import { WaterCursorEffect } from './components/WaterCursorEffect';
+import { UpperTabsBar } from './components/UpperTabsBar';
 
 // Views for Sidebar Tabs
 import { LeadsView } from './components/views/LeadsView';
@@ -262,7 +263,10 @@ export default function App() {
       {/* 1. Realistic Swimming Koi Pond Background Canvas with Mouse Ripples */}
       <KoiPondCanvas opacity={0.92} interactive={true} />
 
-      {/* 2. Main Content Layer with Liquid Glassmorphism */}
+      {/* 2. Fluid Water Cursor & Touch Ripple Layer (Desktop, Tablet & Mobile) */}
+      <WaterCursorEffect />
+
+      {/* 3. Main Content Layer with Liquid Glassmorphism */}
       <div className="relative z-10 min-h-screen flex flex-col">
         
         {/* If in Student Zen Test-Taker Mode */}
@@ -288,6 +292,13 @@ export default function App() {
               onToggleAdminMode={() => setAdminMode(false)}
               onOpenMotionModal={() => setIsMotionModalOpen(true)}
               activeTheme={motionTheme}
+            />
+
+            {/* Interactive Upper Tabs Bar with Liquid Wave Cursor Animation */}
+            <UpperTabsBar
+              activeTab={activeTab}
+              onSelectTab={setActiveTab}
+              language={language}
             />
 
             {/* Body: Sidebar + Active Workspace */}

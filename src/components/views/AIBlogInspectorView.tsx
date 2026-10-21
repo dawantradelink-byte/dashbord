@@ -147,29 +147,43 @@ export const AIBlogInspectorView: React.FC<AIBlogInspectorViewProps> = ({ langua
               </div>
             </div>
 
-            {/* Quality Metrics */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              <div className="p-3.5 rounded-2xl bg-black/40 border border-white/5">
-                <span className="text-[10px] text-rose-300/70 block uppercase font-mono">Originality Score</span>
-                <div className="text-xl font-bold font-mono text-emerald-400 mt-1">94% Human</div>
-                <span className="text-[10px] text-rose-200/60">Low AI artifacting</span>
-              </div>
-              <div className="p-3.5 rounded-2xl bg-black/40 border border-white/5">
-                <span className="text-[10px] text-rose-300/70 block uppercase font-mono">Lexical Density</span>
-                <div className="text-xl font-bold font-mono text-cyan-300 mt-1">Band 8.5</div>
-                <span className="text-[10px] text-rose-200/60">Advanced collocations</span>
-              </div>
-              <div className="p-3.5 rounded-2xl bg-black/40 border border-white/5">
-                <span className="text-[10px] text-rose-300/70 block uppercase font-mono">SEO Readiness</span>
-                <div className="text-xl font-bold font-mono text-amber-300 mt-1">98 / 100</div>
-                <span className="text-[10px] text-rose-200/60">Schema & meta valid</span>
-              </div>
-              <div className="p-3.5 rounded-2xl bg-black/40 border border-white/5">
-                <span className="text-[10px] text-rose-300/70 block uppercase font-mono">Reading Level</span>
-                <div className="text-xl font-bold font-mono text-purple-300 mt-1">Grade 11</div>
-                <span className="text-[10px] text-rose-200/60">Clear academic tone</span>
-              </div>
-            </div>
+            {/* Genuine Quality & Text Metrics */}
+            {(() => {
+              const wordCount = selectedBlog.content.trim().split(/\s+/).filter(Boolean).length;
+              const uniqueWords = (new Set(selectedBlog.content.toLowerCase().match(/[a-z]{3,}/g) || [])).size;
+              const readingTime = Math.max(1, Math.ceil(wordCount / 180));
+
+              return (
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  <div className="p-3.5 rounded-2xl bg-black/40 border border-white/5">
+                    <span className="text-[10px] text-rose-300/70 block uppercase font-mono">Word Count</span>
+                    <div className="text-xl font-bold font-mono text-emerald-400 mt-1">{wordCount} words</div>
+                    <span className="text-[10px] text-rose-200/60">~{readingTime} min read</span>
+                  </div>
+                  <div className="p-3.5 rounded-2xl bg-black/40 border border-white/5">
+                    <span className="text-[10px] text-rose-300/70 block uppercase font-mono">Lexical Variety</span>
+                    <div className="text-xl font-bold font-mono text-cyan-300 mt-1">{uniqueWords} terms</div>
+                    <span className="text-[10px] text-rose-200/60">Unique root terms</span>
+                  </div>
+                  <div className="p-3.5 rounded-2xl bg-black/40 border border-white/5">
+                    <span className="text-[10px] text-rose-300/70 block uppercase font-mono">Origin Source</span>
+                    <div className="text-base font-bold font-mono text-amber-300 mt-1 truncate">
+                      {selectedBlog.isAIGenerated ? (selectedBlog.aiModel || 'AI Draft') : 'Human Draft'}
+                    </div>
+                    <span className="text-[10px] text-rose-200/60 truncate block">{selectedBlog.author}</span>
+                  </div>
+                  <div className="p-3.5 rounded-2xl bg-black/40 border border-white/5">
+                    <span className="text-[10px] text-rose-300/70 block uppercase font-mono">Review Stamp</span>
+                    <div className="text-base font-bold font-mono text-purple-300 mt-1 truncate">
+                      {selectedBlog.humanApproved ? 'Approved' : 'Pending'}
+                    </div>
+                    <span className="text-[10px] text-rose-200/60 truncate block">
+                      {selectedBlog.humanApproved ? (selectedBlog.approvedBy || 'Ishak Dawan') : 'Needs Signoff'}
+                    </span>
+                  </div>
+                </div>
+              );
+            })()}
 
             {/* Article Content Preview */}
             <div className="space-y-2">

@@ -346,6 +346,18 @@ class StorageService {
     this.setItem(STORAGE_KEYS.LEADS, leads);
   }
 
+  public isDuplicateLead(email: string, phone: string): boolean {
+    const cleanPhone = (phone || '').replace(/[^0-9]/g, '');
+    const cleanEmail = (email || '').toLowerCase().trim();
+    if (!cleanPhone && !cleanEmail) return false;
+    const leads = this.getLeads();
+    return leads.some((l) => {
+      const matchEmail = cleanEmail && l.email && l.email.toLowerCase().trim() === cleanEmail;
+      const matchPhone = cleanPhone && l.phone && l.phone.replace(/[^0-9]/g, '') === cleanPhone;
+      return (matchEmail || matchPhone);
+    });
+  }
+
   public addLead(lead: Lead): Lead[] {
     const leads = this.getLeads();
     const updated = [lead, ...leads];
@@ -378,7 +390,9 @@ class StorageService {
         targetBand: entry.targetBand || 7.5
       };
       const existingHistory = prevIelts.history || [];
-      const newHistory = [...existingHistory, entry];
+      // Deduplicate by entry ID or matching test title & date
+      const dedupedHistory = existingHistory.filter((h) => h.id !== entry.id && !(h.testTitle === entry.testTitle && h.testDate === entry.testDate));
+      const newHistory = [...dedupedHistory, entry];
 
       return {
         ...l,
