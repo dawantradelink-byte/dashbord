@@ -14,6 +14,7 @@ import {
   Share2
 } from 'lucide-react';
 import { storageService, BlogArticle } from '../../services/storageService';
+import { ConfirmDeleteModal } from '../ConfirmDeleteModal';
 
 interface BlogManagerViewProps {
   language: 'en' | 'bn';
@@ -22,6 +23,7 @@ interface BlogManagerViewProps {
 export const BlogManagerView: React.FC<BlogManagerViewProps> = ({ language }) => {
   const [blogs, setBlogs] = useState<BlogArticle[]>(() => storageService.getBlogs());
   const [search, setSearch] = useState('');
+  const [blogToDelete, setBlogToDelete] = useState<BlogArticle | null>(null);
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [isCreating, setIsCreating] = useState(false);
 
@@ -63,10 +65,11 @@ export const BlogManagerView: React.FC<BlogManagerViewProps> = ({ language }) =>
     setNewContent('');
   };
 
-  const handleDeleteBlog = (id: string) => {
-    if (window.confirm('Delete this article permanently?')) {
-      const updated = storageService.deleteBlog(id);
+  const handleConfirmDelete = () => {
+    if (blogToDelete) {
+      const updated = storageService.deleteBlog(blogToDelete.id);
       setBlogs(updated);
+      setBlogToDelete(null);
     }
   };
 
@@ -285,7 +288,7 @@ export const BlogManagerView: React.FC<BlogManagerViewProps> = ({ language }) =>
               <div className="flex items-center gap-2">
                 <span className="text-[11px]">{blog.updatedAt}</span>
                 <button
-                  onClick={() => handleDeleteBlog(blog.id)}
+                  onClick={() => setBlogToDelete(blog)}
                   className="p-1 rounded text-rose-400 hover:text-white transition-colors"
                   title="Delete article"
                 >
@@ -296,6 +299,15 @@ export const BlogManagerView: React.FC<BlogManagerViewProps> = ({ language }) =>
           </div>
         ))}
       </div>
+
+      <ConfirmDeleteModal
+        isOpen={!!blogToDelete}
+        title="Delete Blog Article Permanently?"
+        message="This will delete the article from the portal and unpublish it from the Next Border student portal."
+        itemName={blogToDelete ? blogToDelete.title : undefined}
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setBlogToDelete(null)}
+      />
     </motion.div>
   );
 };

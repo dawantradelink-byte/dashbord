@@ -14,6 +14,7 @@ import {
   Volume2
 } from 'lucide-react';
 import { storageService, PortalSettings } from '../../services/storageService';
+import { ConfirmDeleteModal } from '../ConfirmDeleteModal';
 
 interface SettingsViewProps {
   language: 'en' | 'bn';
@@ -23,6 +24,7 @@ interface SettingsViewProps {
 export const SettingsView: React.FC<SettingsViewProps> = ({ language, onShowToast }) => {
   const [settings, setSettings] = useState<PortalSettings>(() => storageService.getSettings());
   const [saved, setSaved] = useState(false);
+  const [isResetConfirmOpen, setIsResetConfirmOpen] = useState(false);
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,11 +34,10 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ language, onShowToas
     setTimeout(() => setSaved(false), 3000);
   };
 
-  const handleResetData = () => {
-    if (window.confirm('Reset all demo data and restore baseline mock leads?')) {
-      localStorage.clear();
-      window.location.reload();
-    }
+  const handleConfirmReset = () => {
+    localStorage.clear();
+    setIsResetConfirmOpen(false);
+    window.location.reload();
   };
 
   return (
@@ -68,7 +69,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ language, onShowToas
         </div>
 
         <button
-          onClick={handleResetData}
+          onClick={() => setIsResetConfirmOpen(true)}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-rose-950/60 text-rose-300 text-xs border border-white/10 transition-colors"
         >
           <RotateCcw className="w-3.5 h-3.5" />
@@ -194,6 +195,15 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ language, onShowToas
         </div>
 
       </form>
+
+      <ConfirmDeleteModal
+        isOpen={isResetConfirmOpen}
+        title="Reset & Restore Baseline Test Fixtures?"
+        message="This will clear current browser storage and restore baseline mock test records. Any custom student evaluations created in this session will be reset."
+        itemName="Browser Storage & Lead Cache"
+        onConfirm={handleConfirmReset}
+        onCancel={() => setIsResetConfirmOpen(false)}
+      />
     </motion.div>
   );
 };

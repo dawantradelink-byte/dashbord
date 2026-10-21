@@ -30,6 +30,24 @@ export interface IELTSScoreBreakdown {
   evaluatedBy?: string;
 }
 
+export interface IELTSMockTestHistoryEntry {
+  id: string;
+  testTitle: string;
+  testDate: string;
+  testType: 'Academic' | 'General Training' | 'Writing Only' | 'Speaking Only';
+  listening: number;
+  reading: number;
+  writing: number;
+  speaking: number;
+  overall: number;
+  cefrLevel: string;
+  targetBand?: number;
+  examinerNotes?: string;
+  evaluatedBy?: string;
+  rawListening?: number;
+  rawReading?: number;
+}
+
 export interface IELTSMockSubmission {
   testType: 'Academic' | 'General Training' | 'Writing Only' | 'Speaking Only';
   targetCountry: string;
@@ -42,6 +60,7 @@ export interface IELTSMockSubmission {
   rawListeningScore?: number; // out of 40
   rawReadingScore?: number; // out of 40
   scores?: IELTSScoreBreakdown;
+  history?: IELTSMockTestHistoryEntry[];
 }
 
 export interface Lead {

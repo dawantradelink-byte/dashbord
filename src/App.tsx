@@ -32,7 +32,7 @@ import { SettingsView } from './components/views/SettingsView';
 
 import { INITIAL_LEADS } from './data/mockData';
 import { storageService } from './services/storageService';
-import { Lead, LeadStatus, IELTSScoreBreakdown } from './types';
+import { Lead, LeadStatus, IELTSScoreBreakdown, IELTSMockTestHistoryEntry } from './types';
 
 export default function App() {
   const [adminMode, setAdminMode] = useState<boolean>(true);
@@ -147,6 +147,12 @@ export default function App() {
     addToast('New Student Lead Created', `${newLead.name} (${newLead.type}) has been registered.`);
   };
 
+  const handleAddTestEntry = (leadId: string, entry: IELTSMockTestHistoryEntry) => {
+    const updated = storageService.addMockTestHistoryEntry(leadId, entry);
+    setLeads(updated);
+    addToast('Mock Attempt Recorded', `Recorded "${entry.testTitle}" (Overall Band ${entry.overall.toFixed(1)})`);
+  };
+
   // Render workspace content based on activeTab
   const renderWorkspace = () => {
     switch (activeTab) {
@@ -216,6 +222,7 @@ export default function App() {
             onOpenEvaluation={handleOpenEvaluation}
             onOpenZenTestMode={() => setAdminMode(false)}
             onUpdateStatus={handleUpdateStatus}
+            onAddTestEntry={handleAddTestEntry}
             language={language}
           />
         );

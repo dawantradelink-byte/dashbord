@@ -4,7 +4,7 @@
  * IELTS mock tests, blogs, and real website telemetry.
  */
 
-import { Lead, LeadStatus, IELTSScoreBreakdown } from '../types';
+import { Lead, LeadStatus, IELTSScoreBreakdown, IELTSMockTestHistoryEntry } from '../types';
 
 export interface BlogArticle {
   id: string;
@@ -300,6 +300,39 @@ class StorageService {
   public getLeads(initialSeed?: Lead[]): Lead[] {
     const stored = this.getItem<Lead[] | null>(STORAGE_KEYS.LEADS, null);
     if (stored && Array.isArray(stored) && stored.length > 0) {
+      // Data migration: if stored IELTS leads lack history array, merge from initialSeed if available
+      if (initialSeed && initialSeed.length > 0) {
+        let hasChanges = false;
+        const upgraded = stored.map((item) => {
+          if (item.ieltsData && (!item.ieltsData.history || item.ieltsData.history.length === 0)) {
+            const seedMatch = initialSeed.find((s) => s.id === item.id);
+            if (seedMatch?.ieltsData?.history && seedMatch.ieltsData.history.length > 0) {
+              hasChanges = true;
+              return {
+                ...item,
+                ieltsData: {
+                  ...item.ieltsData,
+                  history: seedMatch.ieltsData.history
+                }
+              };
+            }
+          }
+          return item;
+        });
+
+        // Also ensure any newly introduced lead (like id 8) is present
+        initialSeed.forEach((seedItem) => {
+          if (!upgraded.some((u) => u.id === seedItem.id)) {
+            upgraded.push(seedItem);
+            hasChanges = true;
+          }
+        });
+
+        if (hasChanges) {
+          this.setItem(STORAGE_KEYS.LEADS, upgraded);
+          return upgraded;
+        }
+      }
       return stored;
     }
     if (initialSeed && initialSeed.length > 0) {
@@ -331,6 +364,45 @@ class StorageService {
   public deleteLead(id: string): Lead[] {
     const leads = this.getLeads();
     const updated = leads.filter((l) => l.id !== id);
+    this.saveLeads(updated);
+    return updated;
+  }
+
+  public addMockTestHistoryEntry(leadId: string, entry: IELTSMockTestHistoryEntry): Lead[] {
+    const leads = this.getLeads();
+    const updated = leads.map((l) => {
+      if (l.id !== leadId) return l;
+      const prevIelts = l.ieltsData || {
+        testType: entry.testType,
+        targetCountry: 'Canada',
+        targetBand: entry.targetBand || 7.5
+      };
+      const existingHistory = prevIelts.history || [];
+      const newHistory = [...existingHistory, entry];
+
+      return {
+        ...l,
+        ieltsData: {
+          ...prevIelts,
+          scores: {
+            listening: entry.listening,
+            reading: entry.reading,
+            writing: entry.writing,
+            speaking: entry.speaking,
+            overall: entry.overall,
+            cefrLevel: entry.cefrLevel,
+            examinerNotes: entry.examinerNotes || prevIelts.scores?.examinerNotes || '',
+            evaluatedAt: entry.testDate,
+            evaluatedBy: entry.evaluatedBy || 'Ishak Dawan (Senior Examiner)'
+          },
+          history: newHistory
+        },
+        status: (l.status === 'Submitted' || l.status === 'New' || l.status === 'Pending Evaluation') 
+          ? ('Evaluated' as LeadStatus) 
+          : l.status,
+        updatedAt: new Date().toLocaleString()
+      };
+    });
     this.saveLeads(updated);
     return updated;
   }
@@ -443,50 +515,95 @@ class StorageService {
     this.setItem(STORAGE_KEYS.SETTINGS, settings);
   }
 
+  // REAL PORTAL OPERATIONAL SUMMARY (Calculated directly from real database records)
+  public getOperationalSummary() {
+    const leads = this.getLeads();
+    const clients = this.getClients();
+    const visas = this.getVisas();
+    const settings = this.getSettings();
+
+    const totalLeads = leads.length;
+    const evaluatedLeads = leads.filter((l) => l.status === 'Evaluated' || l.status === 'Result Sent').length;
+    const pendingLeads = leads.filter((l) => l.status === 'New' || l.status === 'Pending Evaluation' || l.status === 'Submitted').length;
+
+    let totalMockAttempts = 0;
+    let bandSum = 0;
+    let evaluatedTestsCount = 0;
+
+    leads.forEach((l) => {
+      if (l.ieltsData?.history && l.ieltsData.history.length > 0) {
+        totalMockAttempts += l.ieltsData.history.length;
+        l.ieltsData.history.forEach((h) => {
+          bandSum += h.overall;
+          evaluatedTestsCount++;
+        });
+      } else if (l.ieltsData?.scores) {
+        totalMockAttempts++;
+        bandSum += l.ieltsData.scores.overall;
+        evaluatedTestsCount++;
+      }
+    });
+
+    const avgBand = evaluatedTestsCount > 0 ? Number((bandSum / evaluatedTestsCount).toFixed(1)) : null;
+
+    // Academic vs General training breakdown
+    let academicCount = 0;
+    let generalCount = 0;
+    leads.forEach((l) => {
+      if (l.ieltsData?.testType === 'General Training') generalCount++;
+      else if (l.ieltsData) academicCount++;
+    });
+
+    // Country distribution from leads and clients
+    const countryCounts: Record<string, number> = {};
+    leads.forEach((l) => {
+      const country = l.ieltsData?.targetCountry || 'Canada';
+      countryCounts[country] = (countryCounts[country] || 0) + 1;
+    });
+
+    return {
+      totalLeads,
+      evaluatedLeads,
+      pendingLeads,
+      totalMockAttempts,
+      avgBand,
+      totalClients: clients.length,
+      totalVisas: visas.length,
+      academicCount,
+      generalCount,
+      countryCounts,
+      isGoogleAnalyticsConnected: !!(settings.googleAnalyticsId && settings.googleAnalyticsId.startsWith('G-')),
+      googleAnalyticsId: settings.googleAnalyticsId || ''
+    };
+  }
+
   // REAL TELEMETRY & ANALYTICS
   public getAnalytics(): RealAnalyticsData {
     const settings = this.getSettings();
-    const leads = this.getLeads();
-    
-    // Count academic vs general from real leads
-    let academic = 0;
-    let general = 0;
-    leads.forEach((l) => {
-      if (l.ieltsData?.testType === 'General Training') general++;
-      else academic++;
-    });
-
+    const summary = this.getOperationalSummary();
     const storedAnalytics = this.getItem<Partial<RealAnalyticsData>>(STORAGE_KEYS.ANALYTICS, {});
-    const totalViews = storedAnalytics.totalPageViews || 1845;
-    const totalSessions = storedAnalytics.totalUniqueSessions || 420;
+    const isGAConnected = !!(settings.googleAnalyticsId && settings.googleAnalyticsId.startsWith('G-'));
+
+    const totalViews = storedAnalytics.totalPageViews || 0;
+    const totalSessions = storedAnalytics.totalUniqueSessions || 0;
 
     return {
-      isGoogleAnalyticsConnected: !!(settings.googleAnalyticsId && settings.googleAnalyticsId.startsWith('G-')),
+      isGoogleAnalyticsConnected: isGAConnected,
       googleAnalyticsId: settings.googleAnalyticsId || '',
       totalPageViews: totalViews,
       totalUniqueSessions: totalSessions,
-      sessionsToday: Math.round(totalSessions * 0.12),
-      sessionsThisWeek: Math.round(totalSessions * 0.48),
+      sessionsToday: isGAConnected ? Math.round(totalSessions * 0.12) : 0,
+      sessionsThisWeek: isGAConnected ? Math.round(totalSessions * 0.48) : 0,
       sessionsThisMonth: totalSessions,
-      historyDaily: storedAnalytics.historyDaily || [
-        { date: 'Oct 13', views: 180 },
-        { date: 'Oct 14', views: 240 },
-        { date: 'Oct 15', views: 210 },
-        { date: 'Oct 16', views: 295 },
-        { date: 'Oct 17', views: 360 },
-        { date: 'Oct 18', views: 410 },
-        { date: 'Oct 19', views: 480 }
-      ],
-      topPagesLive: [
-        { page: 'IELTS Practice Hub', path: '/ielts-practice', views: Math.round(totalViews * 0.38), avgTime: '4m 12s' },
-        { page: 'USA Student Visa Guide', path: '/visa-usa', views: Math.round(totalViews * 0.24), avgTime: '3m 28s' },
-        { page: 'Scholarship Finder', path: '/scholarships', views: Math.round(totalViews * 0.16), avgTime: '2m 50s' },
-        { page: 'Work Permit Europe', path: '/work-permit', views: Math.round(totalViews * 0.12), avgTime: '2m 16s' },
-        { page: 'Blog & Articles', path: '/blog', views: Math.round(totalViews * 0.10), avgTime: '1m 48s' }
+      historyDaily: storedAnalytics.historyDaily || [],
+      topPagesLive: storedAnalytics.topPagesLive || [
+        { page: 'IELTS Practice Hub', path: '/ielts-practice', views: totalViews ? Math.round(totalViews * 0.4) : 0, avgTime: '4m 12s' },
+        { page: 'USA Student Visa Guide', path: '/visa-usa', views: totalViews ? Math.round(totalViews * 0.3) : 0, avgTime: '3m 28s' },
+        { page: 'Scholarship Finder', path: '/scholarships', views: totalViews ? Math.round(totalViews * 0.2) : 0, avgTime: '2m 50s' }
       ],
       moduleDistribution: {
-        academic: academic || 1,
-        general: general || 1
+        academic: summary.academicCount || 0,
+        general: summary.generalCount || 0
       }
     };
   }
@@ -494,8 +611,8 @@ class StorageService {
   public recordPageEvent(event: 'pageview' | 'mock_submission', detail?: string): void {
     try {
       const current = this.getItem<Partial<RealAnalyticsData>>(STORAGE_KEYS.ANALYTICS, {});
-      const totalViews = (current.totalPageViews || 1845) + 1;
-      const totalSessions = (current.totalUniqueSessions || 420) + (event === 'mock_submission' ? 1 : 0);
+      const totalViews = (current.totalPageViews || 0) + 1;
+      const totalSessions = (current.totalUniqueSessions || 0) + (event === 'mock_submission' ? 1 : 0);
       
       this.setItem(STORAGE_KEYS.ANALYTICS, {
         ...current,

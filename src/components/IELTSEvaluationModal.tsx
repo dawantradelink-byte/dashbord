@@ -23,6 +23,7 @@ import {
 import confetti from 'canvas-confetti';
 import { Lead, IELTSScoreBreakdown, LeadStatus } from '../types';
 import { NextBorderLogo } from './NextBorderLogo';
+import { calculateIELTSOverall, getIELTSCefr } from '../utils/ieltsAudit';
 
 interface IELTSEvaluationModalProps {
   lead: Lead | null;
@@ -46,7 +47,7 @@ export const IELTSEvaluationModal: React.FC<IELTSEvaluationModalProps> = ({
     writing: 6.5,
     speaking: 7.0,
     overall: 7.0,
-    cefrLevel: 'C1 Advanced',
+    cefrLevel: 'C1 Advanced (Effective Operational)',
     examinerNotes: 'Good logical organization in writing. Speaking was spontaneous with clear pronunciation. Focus on varying sentence clauses to reach Band 8.0.'
   };
 
@@ -63,23 +64,14 @@ export const IELTSEvaluationModal: React.FC<IELTSEvaluationModalProps> = ({
     draftOpened: boolean;
   } | null>(null);
 
-  // IELTS Overall band calculation: average rounded to nearest 0.5
-  const calculateOverall = (l: number, r: number, w: number, s: number): number => {
-    const avg = (l + r + w + s) / 4;
-    const decimal = avg - Math.floor(avg);
-    if (decimal < 0.25) return Math.floor(avg);
-    if (decimal < 0.75) return Math.floor(avg) + 0.5;
-    return Math.ceil(avg);
-  };
-
   const currentOverall = calculateOverall(listening, reading, writing, speaking);
 
+  function calculateOverall(l: number, r: number, w: number, s: number): number {
+    return calculateIELTSOverall(l, r, w, s);
+  }
+
   const getCEFR = (band: number): string => {
-    if (band >= 8.5) return 'C2 Mastery (Native-like)';
-    if (band >= 7.0) return 'C1 Advanced (Effective Operational)';
-    if (band >= 6.0) return 'B2 Independent (Vantage)';
-    if (band >= 5.0) return 'B1 Threshold';
-    return 'A2 Waystage';
+    return getIELTSCefr(band);
   };
 
   // Generate official WhatsApp formatted text
@@ -108,8 +100,14 @@ export const IELTSEvaluationModal: React.FC<IELTSEvaluationModalProps> = ({
     const msg = generateWhatsAppMessage();
     const url = `https://wa.me/${cleanPhone}?text=${msg}`;
 
-    // Open WhatsApp in new window
-    window.open(url, '_blank', 'noopener,noreferrer');
+    // Trigger WhatsApp safely avoiding iframe sandbox popup restrictions
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.target = '_blank';
+    anchor.rel = 'noopener noreferrer';
+    document.body.appendChild(anchor);
+    anchor.click();
+    document.body.removeChild(anchor);
 
     // Prompt admin for explicit confirmation before changing status
     setPendingConfirmation({

@@ -15,6 +15,7 @@ import {
   Edit2
 } from 'lucide-react';
 import { StudentClient, storageService } from '../../services/storageService';
+import { ConfirmDeleteModal } from '../ConfirmDeleteModal';
 
 interface ClientsViewProps {
   language: 'en' | 'bn';
@@ -23,6 +24,7 @@ interface ClientsViewProps {
 export const ClientsView: React.FC<ClientsViewProps> = ({ language }) => {
   const [clients, setClients] = useState<StudentClient[]>(() => storageService.getClients());
   const [search, setSearch] = useState('');
+  const [clientToDelete, setClientToDelete] = useState<StudentClient | null>(null);
   const [selectedStage, setSelectedStage] = useState('All');
   const [isAdding, setIsAdding] = useState(false);
 
@@ -62,10 +64,11 @@ export const ClientsView: React.FC<ClientsViewProps> = ({ language }) => {
     setNewNotes('');
   };
 
-  const handleDeleteClient = (id: string) => {
-    if (window.confirm('Are you sure you want to delete this student record?')) {
-      const updated = storageService.deleteClient(id);
+  const handleConfirmDelete = () => {
+    if (clientToDelete) {
+      const updated = storageService.deleteClient(clientToDelete.id);
       setClients(updated);
+      setClientToDelete(null);
     }
   };
 
@@ -287,7 +290,7 @@ export const ClientsView: React.FC<ClientsViewProps> = ({ language }) => {
                   </div>
                 </div>
                 <button
-                  onClick={() => handleDeleteClient(client.id)}
+                  onClick={() => setClientToDelete(client)}
                   className="p-1 rounded-lg text-rose-400/60 hover:text-rose-300 hover:bg-white/5 transition-colors"
                   title="Delete student"
                 >
@@ -353,6 +356,15 @@ export const ClientsView: React.FC<ClientsViewProps> = ({ language }) => {
           </div>
         ))}
       </div>
+
+      <ConfirmDeleteModal
+        isOpen={!!clientToDelete}
+        title="Delete Student Client Record?"
+        message="This will remove the student profile, assigned counselor, and stage history from the portal database."
+        itemName={clientToDelete ? `${clientToDelete.name} (${clientToDelete.targetCountry})` : undefined}
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setClientToDelete(null)}
+      />
     </motion.div>
   );
 };

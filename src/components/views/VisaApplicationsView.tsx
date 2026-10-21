@@ -13,6 +13,7 @@ import {
   Trash2
 } from 'lucide-react';
 import { VisaApplication, storageService } from '../../services/storageService';
+import { ConfirmDeleteModal } from '../ConfirmDeleteModal';
 
 interface VisaApplicationsViewProps {
   language: 'en' | 'bn';
@@ -21,6 +22,7 @@ interface VisaApplicationsViewProps {
 export const VisaApplicationsView: React.FC<VisaApplicationsViewProps> = ({ language }) => {
   const [visas, setVisas] = useState<VisaApplication[]>(() => storageService.getVisas());
   const [search, setSearch] = useState('');
+  const [visaToDelete, setVisaToDelete] = useState<VisaApplication | null>(null);
   const [selectedCountry, setSelectedCountry] = useState('All');
   const [isAdding, setIsAdding] = useState(false);
 
@@ -55,10 +57,11 @@ export const VisaApplicationsView: React.FC<VisaApplicationsViewProps> = ({ lang
     setCasI20Number('');
   };
 
-  const handleDeleteVisa = (id: string) => {
-    if (window.confirm('Delete this visa application record?')) {
-      const updated = storageService.deleteVisa(id);
+  const handleConfirmDelete = () => {
+    if (visaToDelete) {
+      const updated = storageService.deleteVisa(visaToDelete.id);
       setVisas(updated);
+      setVisaToDelete(null);
     }
   };
 
@@ -314,7 +317,7 @@ export const VisaApplicationsView: React.FC<VisaApplicationsViewProps> = ({ lang
                   </td>
                   <td className="py-3.5 px-4 text-right">
                     <button
-                      onClick={() => handleDeleteVisa(visa.id)}
+                      onClick={() => setVisaToDelete(visa)}
                       className="p-1.5 rounded-lg text-rose-400/60 hover:text-rose-200 hover:bg-rose-900/40 transition-colors"
                       title="Delete Visa Record"
                     >
@@ -327,6 +330,15 @@ export const VisaApplicationsView: React.FC<VisaApplicationsViewProps> = ({ lang
           </table>
         </div>
       </div>
+
+      <ConfirmDeleteModal
+        isOpen={!!visaToDelete}
+        title="Delete Visa Application Record?"
+        message="This will remove the student's visa application, intake deadline, and embassy tracking from the portal database."
+        itemName={visaToDelete ? `${visaToDelete.studentName} (${visaToDelete.country} - ${visaToDelete.visaType})` : undefined}
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setVisaToDelete(null)}
+      />
     </motion.div>
   );
 };

@@ -16,13 +16,16 @@ import {
   GraduationCap,
   Plus
 } from 'lucide-react';
-import { Lead, LeadStatus } from '../../types';
+import { Lead, LeadStatus, IELTSMockTestHistoryEntry } from '../../types';
+import { IELTSPerformanceProgressionChart } from '../IELTSPerformanceProgressionChart';
+import { countWords } from '../../utils/ieltsAudit';
 
 interface IELTSMockViewProps {
   leads: Lead[];
   onOpenEvaluation: (lead: Lead) => void;
   onOpenZenTestMode: () => void;
   onUpdateStatus: (id: string, status: LeadStatus) => void;
+  onAddTestEntry?: (leadId: string, entry: IELTSMockTestHistoryEntry) => void;
   language: 'en' | 'bn';
 }
 
@@ -31,9 +34,11 @@ export const IELTSMockView: React.FC<IELTSMockViewProps> = ({
   onOpenEvaluation,
   onOpenZenTestMode,
   onUpdateStatus,
+  onAddTestEntry,
   language
 }) => {
   const [selectedStatusTab, setSelectedStatusTab] = useState<string>('All');
+  const [viewMode, setViewMode] = useState<'both' | 'chart_only' | 'cards_only'>('both');
 
   // Filter only IELTS Mock Test leads
   const ieltsLeads = leads.filter((l) => l.type === 'IELTS Mock Test');
@@ -118,91 +123,112 @@ export const IELTSMockView: React.FC<IELTSMockViewProps> = ({
         ))}
       </div>
 
-      {/* Filter Tabs */}
-      <div className="flex items-center gap-2 border-b border-white/10 pb-3">
-        {['All', 'Pending', 'Evaluated', 'Sent'].map((tab) => (
-          <button
-            key={tab}
-            onClick={() => setSelectedStatusTab(tab)}
-            className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
-              selectedStatusTab === tab
-                ? 'glass-pill-active text-white shadow-lg'
-                : 'text-rose-300/70 hover:text-white hover:bg-white/5'
-            }`}
-          >
-            {tab} Submissions
-          </button>
-        ))}
-      </div>
+      {/* Historical Performance Tracking Chart Component */}
+      {(viewMode === 'both' || viewMode === 'chart_only') && (
+        <IELTSPerformanceProgressionChart
+          leads={leads}
+          onAddTestEntry={onAddTestEntry || (() => {})}
+          language={language}
+        />
+      )}
 
-      {/* IELTS Test Submissions Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        {filtered.map((lead) => {
-          const ielts = lead.ieltsData;
-          const scores = ielts?.scores;
+      {/* View Switcher and Filter Tabs */}
+      {(viewMode === 'both' || viewMode === 'cards_only') && (
+        <>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-3 pt-2">
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-rose-200/70 font-medium">Submissions:</span>
+              {['All', 'Pending', 'Evaluated', 'Sent'].map((tab) => (
+                <button
+                  key={tab}
+                  onClick={() => setSelectedStatusTab(tab)}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+                    selectedStatusTab === tab
+                      ? 'glass-pill-active text-white shadow-lg'
+                      : 'text-rose-300/70 hover:text-white hover:bg-white/5'
+                  }`}
+                >
+                  {tab}
+                </button>
+              ))}
+            </div>
 
-          return (
-            <div
-              key={lead.id}
-              className="p-5 rounded-3xl glass-panel border border-white/10 hover:border-rose-500/30 transition-all shadow-xl flex flex-col justify-between"
-            >
-              <div>
-                {/* Header Row */}
-                <div className="flex items-start justify-between gap-3 pb-3 border-b border-white/10">
-                  <div className="flex items-center gap-3">
-                    <img
-                      src={lead.avatar}
-                      alt={lead.name}
-                      className="w-11 h-11 rounded-2xl object-cover border border-rose-500/40"
-                    />
-                    <div>
-                      <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                        <span>{lead.name}</span>
-                        <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-white/10 text-rose-200">
-                          {ielts?.testType || 'Academic'}
-                        </span>
-                      </h3>
-                      <div className="flex items-center gap-3 text-[11px] text-rose-300/70 mt-0.5">
-                        <span className="flex items-center gap-1">
-                          <Phone className="w-3 h-3 text-emerald-400" />
-                          {lead.phone}
-                        </span>
-                        <span>·</span>
-                        <span className="truncate max-w-[140px]">{lead.email}</span>
+            <div className="flex items-center gap-2 text-xs">
+              <span className="text-rose-300/60 font-mono">
+                Showing {filtered.length} of {ieltsLeads.length} mock tests
+              </span>
+            </div>
+          </div>
+
+          {/* IELTS Test Submissions Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            {filtered.map((lead) => {
+              const ielts = lead.ieltsData;
+              const scores = ielts?.scores;
+              const wordCount = ielts?.writingSubmission ? countWords(ielts.writingSubmission) : (ielts?.writingWordCount || 0);
+
+              return (
+                <div
+                  key={lead.id}
+                  className="p-5 rounded-3xl glass-panel border border-white/10 hover:border-rose-500/30 transition-all shadow-xl flex flex-col justify-between"
+                >
+                  <div>
+                    {/* Header Row */}
+                    <div className="flex items-start justify-between gap-3 pb-3 border-b border-white/10">
+                      <div className="flex items-center gap-3">
+                        <img
+                          src={lead.avatar}
+                          alt={lead.name}
+                          className="w-11 h-11 rounded-2xl object-cover border border-rose-500/40"
+                        />
+                        <div>
+                          <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                            <span>{lead.name}</span>
+                            <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-white/10 text-rose-200">
+                              {ielts?.testType || 'Academic'}
+                            </span>
+                          </h3>
+                          <div className="flex items-center gap-3 text-[11px] text-rose-300/70 mt-0.5">
+                            <span className="flex items-center gap-1">
+                              <Phone className="w-3 h-3 text-emerald-400" />
+                              {lead.phone}
+                            </span>
+                            <span>·</span>
+                            <span className="truncate max-w-[140px]">{lead.email}</span>
+                          </div>
+                        </div>
                       </div>
+
+                      <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold border ${getStatusColor(lead.status)}`}>
+                        {lead.status}
+                      </span>
                     </div>
-                  </div>
 
-                  <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold border ${getStatusColor(lead.status)}`}>
-                    {lead.status}
-                  </span>
-                </div>
-
-                {/* Test Content Details */}
-                <div className="py-3.5 space-y-2 text-xs">
-                  <div className="flex items-center justify-between text-rose-200/80">
-                    <span>Target: <strong className="text-white">{ielts?.targetCountry || 'Canada'}</strong></span>
-                    <span>Target Band: <strong className="text-amber-400 font-mono">{ielts?.targetBand || 7.5}</strong></span>
-                    <span className="text-rose-300/60 font-mono text-[10px]">{lead.date}</span>
-                  </div>
-
-                  {/* Essay Snapshot */}
-                  {ielts?.writingSubmission ? (
-                    <div className="p-3 rounded-2xl bg-black/40 border border-white/5 space-y-1">
-                      <div className="flex items-center justify-between text-[11px] text-rose-300">
-                        <span className="font-semibold flex items-center gap-1">
-                          <FileText className="w-3 h-3 text-rose-400" />
-                          Writing Task 2 Essay
-                        </span>
-                        <span className="font-mono text-[10px]">{ielts.writingWordCount || 260} words</span>
+                    {/* Test Content Details */}
+                    <div className="py-3.5 space-y-2 text-xs">
+                      <div className="flex items-center justify-between text-rose-200/80">
+                        <span>Target: <strong className="text-white">{ielts?.targetCountry || 'Canada'}</strong></span>
+                        <span>Target Band: <strong className="text-amber-400 font-mono">{ielts?.targetBand ? ielts.targetBand.toFixed(1) : '7.5'}</strong></span>
+                        <span className="text-rose-300/60 font-mono text-[10px]">{lead.date}</span>
                       </div>
-                      <p className="text-[11px] text-rose-200/70 line-clamp-2 italic">
-                        "{ielts.writingSubmission}"
-                      </p>
-                    </div>
-                  ) : (
-                    <p className="text-[11px] text-rose-300/60 italic">{lead.message}</p>
-                  )}
+
+                      {/* Essay Snapshot */}
+                      {ielts?.writingSubmission ? (
+                        <div className="p-3 rounded-2xl bg-black/40 border border-white/5 space-y-1">
+                          <div className="flex items-center justify-between text-[11px] text-rose-300">
+                            <span className="font-semibold flex items-center gap-1">
+                              <FileText className="w-3 h-3 text-rose-400" />
+                              Writing Task 2 Essay
+                            </span>
+                            <span className="font-mono text-[10px]">{wordCount} words (Audited)</span>
+                          </div>
+                          <p className="text-[11px] text-rose-200/70 line-clamp-2 italic">
+                            "{ielts.writingSubmission}"
+                          </p>
+                        </div>
+                      ) : (
+                        <p className="text-[11px] text-rose-300/60 italic">{lead.message}</p>
+                      )}
 
                   {/* Evaluated Band Scores (if scored) */}
                   {scores && (
@@ -271,6 +297,8 @@ export const IELTSMockView: React.FC<IELTSMockViewProps> = ({
           );
         })}
       </div>
+        </>
+      )}
     </motion.div>
   );
 };
