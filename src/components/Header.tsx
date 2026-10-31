@@ -156,21 +156,6 @@ export const Header: React.FC<HeaderProps> = ({
           )}
         </button>
 
-        {/* MotionSites.ai Inspiration Showcase Button */}
-        {onOpenMotionModal && (
-          <button
-            onClick={onOpenMotionModal}
-            className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-full transition-all border bg-gradient-to-r from-rose-950/40 via-purple-950/40 to-slate-950/40 border-amber-400/30 text-amber-200 hover:text-white hover:border-amber-300 hover:scale-105 active:scale-95 shadow-sm"
-            title="Explore Motionsites.ai Inspired Dynamic Templates"
-          >
-            <Sparkles className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
-            <span className="hidden md:inline">MotionSites</span>
-            <span className="text-[10px] uppercase font-mono px-1 py-0.2 rounded bg-amber-400/20 text-amber-300">
-              {activeTheme}
-            </span>
-          </button>
-        )}
-
         {/* Language Switcher: EN | বাংলা */}
         <div className="flex items-center p-0.5 rounded-full bg-black/30 border border-white/15 text-xs font-medium">
           <button
@@ -195,7 +180,7 @@ export const Header: React.FC<HeaderProps> = ({
           </button>
         </div>
 
-        {/* Subtle Admin Mode Toggle Switch */}
+        {/* Portal View Switch */}
         <button
           onClick={onToggleAdminMode}
           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all border ${
@@ -203,10 +188,10 @@ export const Header: React.FC<HeaderProps> = ({
               ? 'bg-rose-600/80 text-white border-rose-400/40 shadow-sm'
               : 'bg-white/10 text-rose-200 border-white/20 hover:bg-white/15'
           }`}
-          title="Toggle between Admin Evaluator Dashboard and Zen Student Mock Test Portal"
+          title="Toggle between Admin Dashboard and Candidate Test Portal"
         >
           <ShieldCheck className="w-3.5 h-3.5" />
-          <span className="hidden sm:inline">{adminMode ? 'Admin Panel' : 'Zen Student Mode'}</span>
+          <span className="hidden sm:inline">{adminMode ? 'Admin Console' : 'Candidate Portal'}</span>
         </button>
 
         {/* Notifications Dropdown */}
@@ -244,29 +229,35 @@ export const Header: React.FC<HeaderProps> = ({
               </div>
 
               <div className="max-h-80 overflow-y-auto divide-y divide-white/5">
-                {notifications.map((item) => (
-                  <div
-                    key={item.id}
-                    onClick={() => {
-                      setShowNotifications(false);
-                      if (onSelectLeadById && item.studentName) {
-                        // find matching lead
-                      }
-                    }}
-                    className={`p-3.5 hover:bg-rose-900/30 transition-colors cursor-pointer flex items-start gap-3 ${
-                      !item.read ? 'bg-rose-500/10' : ''
-                    }`}
-                  >
-                    <div className="w-7 h-7 rounded-full bg-rose-600/30 border border-rose-500/40 flex items-center justify-center text-rose-300 shrink-0 mt-0.5">
-                      {item.type === 'mock_test' ? <Clock className="w-3.5 h-3.5" /> : <Sparkles className="w-3.5 h-3.5" />}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-semibold text-white truncate">{item.title}</p>
-                      <p className="text-[11px] text-rose-200/70 truncate">{item.studentName}</p>
-                      <span className="text-[10px] text-rose-300/50 mt-1 block">{item.time}</span>
-                    </div>
+                {notifications.length === 0 ? (
+                  <div className="py-8 text-center text-xs text-rose-300/60">
+                    No new notifications
                   </div>
-                ))}
+                ) : (
+                  notifications.map((item) => (
+                    <div
+                      key={item.id}
+                      onClick={() => {
+                        setShowNotifications(false);
+                        if (onSelectLeadById && item.studentName) {
+                          // find matching lead
+                        }
+                      }}
+                      className={`p-3.5 hover:bg-rose-900/30 transition-colors cursor-pointer flex items-start gap-3 ${
+                        !item.read ? 'bg-rose-500/10' : ''
+                      }`}
+                    >
+                      <div className="w-7 h-7 rounded-full bg-rose-600/30 border border-rose-500/40 flex items-center justify-center text-rose-300 shrink-0 mt-0.5">
+                        {item.type === 'mock_test' ? <Clock className="w-3.5 h-3.5" /> : <Sparkles className="w-3.5 h-3.5" />}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-semibold text-white truncate">{item.title}</p>
+                        <p className="text-[11px] text-rose-200/70 truncate">{item.studentName}</p>
+                        <span className="text-[10px] text-rose-300/50 mt-1 block">{item.time}</span>
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
           )}

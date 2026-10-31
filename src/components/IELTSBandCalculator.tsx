@@ -161,7 +161,7 @@ export const IELTSBandCalculator: React.FC<IELTSBandCalculatorProps> = ({
 
         {/* Test Type Switcher */}
         <div className="flex items-center gap-2 self-start md:self-auto">
-          <div className="p-1 rounded-2xl bg-black/40 border border-white/10 flex items-center gap-1">
+          <div className="p-1 rounded-2xl bg-black/20 backdrop-blur-sm border border-white/10 flex items-center gap-1">
             <button
               type="button"
               onClick={() => setTestType('Academic')}
@@ -208,7 +208,7 @@ export const IELTSBandCalculator: React.FC<IELTSBandCalculatorProps> = ({
               key={preset.label}
               type="button"
               onClick={() => handlePreset(preset.val)}
-              className="px-2.5 py-1 rounded-lg bg-rose-950/40 hover:bg-rose-900/60 border border-white/10 text-rose-200 hover:text-white transition-all text-[11px] font-medium"
+              className="px-2.5 py-1 rounded-lg bg-rose-950/25 hover:bg-rose-900/40 border border-white/10 text-rose-200 hover:text-white transition-all text-[11px] font-medium"
             >
               {preset.label}
             </button>
@@ -220,7 +220,7 @@ export const IELTSBandCalculator: React.FC<IELTSBandCalculatorProps> = ({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         
         {/* LISTENING CARD */}
-        <div className="p-4 rounded-2xl bg-black/40 border border-sky-500/30 space-y-3 relative overflow-hidden">
+        <div className="p-4 rounded-2xl bg-black/25 backdrop-blur-sm border border-sky-500/25 space-y-3 relative overflow-hidden">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
               <div className="w-8 h-8 rounded-xl bg-sky-500/20 border border-sky-400/30 flex items-center justify-center text-sky-300">
@@ -258,7 +258,7 @@ export const IELTSBandCalculator: React.FC<IELTSBandCalculatorProps> = ({
                   max="40"
                   value={listeningRaw}
                   onChange={(e) => setListeningRaw(Math.max(0, Math.min(40, parseInt(e.target.value) || 0)))}
-                  className="w-12 text-center py-1 px-1 rounded-lg bg-black/60 border border-white/20 text-white font-mono font-bold text-xs"
+                  className="w-12 text-center py-1 px-1 rounded-lg bg-black/30 border border-white/20 text-white font-mono font-bold text-xs"
                 />
                 <button
                   type="button"
@@ -298,7 +298,7 @@ export const IELTSBandCalculator: React.FC<IELTSBandCalculatorProps> = ({
         </div>
 
         {/* READING CARD */}
-        <div className="p-4 rounded-2xl bg-black/40 border border-emerald-500/30 space-y-3 relative overflow-hidden">
+        <div className="p-4 rounded-2xl bg-black/25 backdrop-blur-sm border border-emerald-500/25 space-y-3 relative overflow-hidden">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
               <div className="w-8 h-8 rounded-xl bg-emerald-500/20 border border-emerald-400/30 flex items-center justify-center text-emerald-300">
@@ -338,7 +338,7 @@ export const IELTSBandCalculator: React.FC<IELTSBandCalculatorProps> = ({
                   max="40"
                   value={readingRaw}
                   onChange={(e) => setReadingRaw(Math.max(0, Math.min(40, parseInt(e.target.value) || 0)))}
-                  className="w-12 text-center py-1 px-1 rounded-lg bg-black/60 border border-white/20 text-white font-mono font-bold text-xs"
+                  className="w-12 text-center py-1 px-1 rounded-lg bg-black/30 border border-white/20 text-white font-mono font-bold text-xs"
                 />
                 <button
                   type="button"
@@ -380,7 +380,7 @@ export const IELTSBandCalculator: React.FC<IELTSBandCalculatorProps> = ({
       </div>
 
       {/* Complete Overall Band Prediction with Writing & Speaking Sliders */}
-      <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-rose-950/70 via-black/80 to-black/90 border border-white/15 space-y-4">
+      <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-rose-950/30 via-black/30 to-black/35 backdrop-blur-sm border border-white/15 space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-3">
           <div className="flex items-center gap-2.5">
             <Award className="w-5 h-5 text-amber-400" />
@@ -453,7 +453,7 @@ export const IELTSBandCalculator: React.FC<IELTSBandCalculatorProps> = ({
         </div>
 
         {/* Live Calculation Formula Strip */}
-        <div className="p-3 rounded-xl bg-black/50 border border-white/10 flex flex-wrap items-center justify-between gap-3 text-xs font-mono">
+        <div className="p-3 rounded-xl bg-black/25 backdrop-blur-sm border border-white/10 flex flex-wrap items-center justify-between gap-3 text-xs font-mono">
           <div className="flex items-center gap-2 text-rose-200/90 flex-wrap">
             <span>({listeningDetail.band.toFixed(1)} + {readingDetail.band.toFixed(1)} + {writingBand.toFixed(1)} + {speakingBand.toFixed(1)}) / 4</span>
             <span>=</span>
@@ -502,7 +502,7 @@ export const IELTSBandCalculator: React.FC<IELTSBandCalculatorProps> = ({
 
       {/* Expandable Official Cambridge Raw-to-Band Table Card */}
       {showTableModal && (
-        <div className="p-4 rounded-2xl bg-black/60 border border-white/15 text-xs space-y-3 animate-in fade-in duration-200">
+        <div className="p-4 rounded-2xl bg-black/30 backdrop-blur-sm border border-white/15 text-xs space-y-3 animate-in fade-in duration-200">
           <div className="flex items-center justify-between border-b border-white/10 pb-2">
             <h5 className="font-bold text-white flex items-center gap-2">
               <ShieldCheck className="w-4 h-4 text-emerald-400" />

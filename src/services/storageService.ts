@@ -89,180 +89,20 @@ export interface PortalSettings {
 }
 
 const STORAGE_KEYS = {
-  LEADS: 'nb_leads_data_v2',
-  BLOGS: 'nb_blogs_data_v2',
-  CLIENTS: 'nb_clients_data_v2',
-  VISAS: 'nb_visas_data_v2',
-  STAFF: 'nb_staff_data_v2',
-  ANALYTICS: 'nb_analytics_data_v2',
-  SETTINGS: 'nb_settings_data_v2'
+  LEADS: 'nb_leads_data_v3',
+  BLOGS: 'nb_blogs_data_v3',
+  CLIENTS: 'nb_clients_data_v3',
+  VISAS: 'nb_visas_data_v3',
+  STAFF: 'nb_staff_data_v3',
+  ANALYTICS: 'nb_analytics_data_v3',
+  SETTINGS: 'nb_settings_data_v3'
 };
 
-// Initial Seed Data (strictly labeled as Baseline/Demo if no real database yet exists)
-const INITIAL_BLOGS: BlogArticle[] = [
-  {
-    id: 'b1',
-    title: 'How to Score Band 8.0 in IELTS Writing Task 2: Proven Essay Structure',
-    slug: 'ielts-writing-task-2-band-8-structure',
-    category: 'IELTS Preparation',
-    excerpt: 'Master the four-paragraph essay template, cohesion techniques, and academic vocabulary needed to achieve Band 8.0.',
-    content: 'Achieving Band 8.0 in IELTS Writing Task 2 requires precise balance between task response, grammatical range, lexical resource, and coherence. In this guide, Senior Examiner Ishak Dawan breaks down the step-by-step drafting process.\n\n1. Analyze the prompt keywords and identify whether it asks for an opinion, discussion, or problem-solution format.\n2. Write a clear thesis statement that directly answers the question.\n3. Develop two body paragraphs with concrete supporting logic and examples.\n4. Conclude concisely without introducing new arguments.',
-    author: 'Ishak Dawan',
-    status: 'Published',
-    isAIGenerated: false,
-    humanApproved: true,
-    approvedBy: 'Ishak Dawan',
-    createdAt: '15 Oct 2026',
-    updatedAt: '17 Oct 2026',
-    publishedAt: '17 Oct 2026',
-    tags: ['IELTS', 'Writing Task 2', 'Band 8', 'Academic'],
-    views: 1420
-  },
-  {
-    id: 'b2',
-    title: 'USA Student Visa (F-1) Interview Guide for Bangladeshi Students',
-    slug: 'usa-f1-visa-interview-guide-bangladesh',
-    category: 'Student Visa',
-    excerpt: 'Essential tips, DS-160 filing checklist, and common consular interview questions at the US Embassy Dhaka.',
-    content: 'The F-1 student visa interview at the US Embassy Dhaka is typically brief, lasting only 2 to 3 minutes. The consular officer primarily assesses your intent to study, academic preparedness, and financial sustainability.\n\nKey documents to arrange in your presentation folder:\n- Valid Passport and DS-160 confirmation barcode\n- Official I-20 issued by your SEVP-certified institution\n- SEVIS I-901 payment receipt\n- Academic transcripts, certificates, and standardized test scores\n- Bank statements demonstrating funding for at least the first academic year.',
-    author: 'Ishak Dawan',
-    status: 'Published',
-    isAIGenerated: false,
-    humanApproved: true,
-    approvedBy: 'Ishak Dawan',
-    createdAt: '12 Oct 2026',
-    updatedAt: '14 Oct 2026',
-    publishedAt: '14 Oct 2026',
-    tags: ['USA', 'F1 Visa', 'I-20', 'Dhaka Embassy'],
-    views: 2180
-  },
-  {
-    id: 'b3',
-    title: 'Draft: Canadian SDS (Student Direct Stream) 2026 Checklist',
-    slug: 'canada-sds-visa-checklist-2026',
-    category: 'Student Visa',
-    excerpt: 'Overview of GIC requirements, language prerequisites (IELTS 6.0 min in each band), and upfront medicals.',
-    content: 'Canada continues to offer streamlined visa processing for eligible international applicants. Ensure all biometrics and tuition receipts are verified through official portal receipts.',
-    author: 'Editorial Desk',
-    status: 'Draft',
-    isAIGenerated: true,
-    aiModel: 'Gemini 2.5 Flash Draft',
-    humanApproved: false,
-    createdAt: '18 Oct 2026',
-    updatedAt: '18 Oct 2026',
-    tags: ['Canada', 'SDS', 'Study Permit', 'Draft'],
-    views: 0
-  }
-];
-
-const INITIAL_CLIENTS: StudentClient[] = [
-  {
-    id: 'c1',
-    name: 'Rafi Ahmed',
-    email: 'rafi.ahmed98@gmail.com',
-    phone: '+8801712345678',
-    targetCountry: 'Canada',
-    targetUniversity: 'University of Windsor (M.Eng Electrical)',
-    currentStage: 'IELTS Preparation',
-    assignedCounselor: 'Ishak Dawan',
-    notes: 'Completed Academic Mock Test with Band 7.5. Ready for conditional admission application.',
-    createdAt: '19 Oct 2026, 10:42 AM',
-    updatedAt: '19 Oct 2026, 11:15 AM'
-  },
-  {
-    id: 'c2',
-    name: 'Nusrat Jahan',
-    email: 'nusrat.jahan22@yahoo.com',
-    phone: '+8801812345679',
-    targetCountry: 'USA',
-    targetUniversity: 'University of Texas at Arlington',
-    currentStage: 'Document Review',
-    assignedCounselor: 'Ishak Dawan',
-    notes: 'Awaiting Fall 2027 I-20 form. GRE waived. Need assistantship counseling.',
-    createdAt: '19 Oct 2026, 09:15 AM',
-    updatedAt: '19 Oct 2026, 09:40 AM'
-  },
-  {
-    id: 'c3',
-    name: 'Sumaiya Akter',
-    email: 'sumaiya.akter.ielts@outlook.com',
-    phone: '+8801712345681',
-    targetCountry: 'United Kingdom',
-    targetUniversity: 'University of Leeds',
-    currentStage: 'IELTS Preparation',
-    assignedCounselor: 'Ishak Dawan',
-    notes: 'Took Speaking test. Needs overall 7.0 for postgraduate biomedical studies.',
-    createdAt: '18 Oct 2026, 11:22 PM',
-    updatedAt: '19 Oct 2026, 09:30 AM'
-  }
-];
-
-const INITIAL_VISAS: VisaApplication[] = [
-  {
-    id: 'v1',
-    studentName: 'Sabbir Hossain',
-    country: 'United Kingdom',
-    visaType: 'Student (F1 / Tier 4 / Study Permit)',
-    intakeSeason: 'January 2027 Intake',
-    applicationStatus: 'Application Submitted',
-    casI20Number: 'CAS-UK-8492019',
-    deadline: '15 Nov 2026',
-    lastUpdated: '19 Oct 2026'
-  },
-  {
-    id: 'v2',
-    studentName: 'Nusrat Jahan',
-    country: 'USA',
-    visaType: 'Student (F1 / Tier 4 / Study Permit)',
-    intakeSeason: 'Fall 2027 Intake',
-    applicationStatus: 'Documents Gathering',
-    deadline: '01 Dec 2026',
-    lastUpdated: '19 Oct 2026'
-  },
-  {
-    id: 'v3',
-    studentName: 'Tanvir Hasan',
-    country: 'Schengen',
-    visaType: 'Tourist / Visit',
-    intakeSeason: 'Winter Holiday 2026',
-    applicationStatus: 'Biometrics / Interview',
-    deadline: '10 Nov 2026',
-    lastUpdated: '18 Oct 2026'
-  }
-];
-
-const INITIAL_STAFF: StaffMember[] = [
-  {
-    id: 's1',
-    name: 'Ishak Dawan',
-    role: 'Managing Director & Senior IELTS Examiner',
-    department: 'IELTS Evaluation',
-    email: 'dawan.tradelink@gmail.com',
-    phone: '+8801711000000',
-    activeStatus: true,
-    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80'
-  },
-  {
-    id: 's2',
-    name: 'Ayesha Rahman',
-    role: 'Senior Visa Processing Officer',
-    department: 'Visa Consultation',
-    email: 'ayesha.nextborder@gmail.com',
-    phone: '+8801722000000',
-    activeStatus: true,
-    avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=120&auto=format&fit=crop&q=80'
-  },
-  {
-    id: 's3',
-    name: 'Kazi Mominul',
-    role: 'Admissions & University Relations Lead',
-    department: 'Admissions',
-    email: 'kazi.admissions@nextborder.com',
-    phone: '+8801733000000',
-    activeStatus: true,
-    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=120&auto=format&fit=crop&q=80'
-  }
-];
+// Initial Seed Data (Empty arrays for pristine blank template)
+const INITIAL_BLOGS: BlogArticle[] = [];
+const INITIAL_CLIENTS: StudentClient[] = [];
+const INITIAL_VISAS: VisaApplication[] = [];
+const INITIAL_STAFF: StaffMember[] = [];
 
 const DEFAULT_SETTINGS: PortalSettings = {
   consultancyName: 'Next Border Visa Consultancy',
@@ -610,11 +450,7 @@ class StorageService {
       sessionsThisWeek: isGAConnected ? Math.round(totalSessions * 0.48) : 0,
       sessionsThisMonth: totalSessions,
       historyDaily: storedAnalytics.historyDaily || [],
-      topPagesLive: storedAnalytics.topPagesLive || [
-        { page: 'IELTS Practice Hub', path: '/ielts-practice', views: totalViews ? Math.round(totalViews * 0.4) : 0, avgTime: '4m 12s' },
-        { page: 'USA Student Visa Guide', path: '/visa-usa', views: totalViews ? Math.round(totalViews * 0.3) : 0, avgTime: '3m 28s' },
-        { page: 'Scholarship Finder', path: '/scholarships', views: totalViews ? Math.round(totalViews * 0.2) : 0, avgTime: '2m 50s' }
-      ],
+      topPagesLive: storedAnalytics.topPagesLive || [],
       moduleDistribution: {
         academic: summary.academicCount || 0,
         general: summary.generalCount || 0

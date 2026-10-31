@@ -132,29 +132,29 @@ export const WebsiteAnalyticsView: React.FC<WebsiteAnalyticsViewProps> = ({ lang
         {[
           {
             title: language === 'en' ? 'Last 24 Hours' : 'গত ২৪ ঘণ্টা',
-            value: dataMode === 'live' ? analytics.sessionsToday.toLocaleString() : '1,248',
-            change: '+12%',
+            value: analytics.sessionsToday ? analytics.sessionsToday.toLocaleString() : '0',
+            change: isConnected ? '+0%' : '—',
             sub: 'Unique Visitor Sessions',
             gradient: 'from-rose-500/20 to-red-600/5'
           },
           {
             title: language === 'en' ? 'Last 7 Days' : 'গত ৭ দিন',
-            value: dataMode === 'live' ? analytics.sessionsThisWeek.toLocaleString() : '6,892',
-            change: '+18.4%',
+            value: analytics.sessionsThisWeek ? analytics.sessionsThisWeek.toLocaleString() : '0',
+            change: isConnected ? '+0%' : '—',
             sub: 'Candidate Sessions',
             gradient: 'from-amber-500/20 to-yellow-600/5'
           },
           {
             title: language === 'en' ? 'Last 1 Month' : 'গত ১ মাস',
-            value: dataMode === 'live' ? analytics.sessionsThisMonth.toLocaleString() : '24,310',
-            change: '+24.1%',
+            value: analytics.sessionsThisMonth ? analytics.sessionsThisMonth.toLocaleString() : '0',
+            change: isConnected ? '+0%' : '—',
             sub: 'Total Engaged Inquiries',
             gradient: 'from-purple-500/20 to-pink-600/5'
           },
           {
             title: language === 'en' ? 'All-Time Visitors' : 'সর্বমোট ভিজিটর',
-            value: dataMode === 'live' ? analytics.totalPageViews.toLocaleString() : '142,500',
-            change: '+31.8%',
+            value: analytics.totalPageViews ? analytics.totalPageViews.toLocaleString() : '0',
+            change: isConnected ? '+0%' : '—',
             sub: 'Cumulative Page Impressions',
             gradient: 'from-emerald-500/20 to-teal-600/5'
           }
@@ -249,27 +249,33 @@ export const WebsiteAnalyticsView: React.FC<WebsiteAnalyticsViewProps> = ({ lang
           </div>
 
           <div className="space-y-2.5 pt-1 text-xs">
-            {analytics.topPagesLive.map((item, i) => (
-              <div
-                key={i}
-                className="p-3 rounded-2xl bg-white/[0.03] border border-white/5 hover:border-rose-500/20 transition-all flex items-center justify-between"
-              >
-                <div>
-                  <div className="font-semibold text-white flex items-center gap-2">
-                    <span className="font-mono text-rose-400 text-[10px]">#{i + 1}</span>
-                    <span>{item.page}</span>
-                  </div>
-                  <span className="text-[10px] font-mono text-rose-300/60">{item.path}</span>
-                </div>
-                <div className="text-right">
-                  <div className="font-mono font-bold text-white text-xs">{item.views.toLocaleString()} views</div>
-                  <span className="text-[10px] text-amber-300/90 font-mono flex items-center justify-end gap-1">
-                    <Clock className="w-3 h-3" />
-                    {item.avgTime}
-                  </span>
-                </div>
+            {analytics.topPagesLive.length === 0 ? (
+              <div className="py-8 text-center text-xs text-rose-300/60">
+                {language === 'en' ? 'No page telemetry recorded yet.' : 'এখনও কোনো পেজ ট্র্যাকিং তথ্য জমা হয়নি।'}
               </div>
-            ))}
+            ) : (
+              analytics.topPagesLive.map((item, i) => (
+                <div
+                  key={i}
+                  className="p-3 rounded-2xl bg-white/[0.03] border border-white/5 hover:border-rose-500/20 transition-all flex items-center justify-between"
+                >
+                  <div>
+                    <div className="font-semibold text-white flex items-center gap-2">
+                      <span className="font-mono text-rose-400 text-[10px]">#{i + 1}</span>
+                      <span>{item.page}</span>
+                    </div>
+                    <span className="text-[10px] font-mono text-rose-300/60">{item.path}</span>
+                  </div>
+                  <div className="text-right">
+                    <div className="font-mono font-bold text-white text-xs">{item.views.toLocaleString()} views</div>
+                    <span className="text-[10px] text-amber-300/90 font-mono flex items-center justify-end gap-1">
+                      <Clock className="w-3 h-3" />
+                      {item.avgTime}
+                    </span>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </div>
 

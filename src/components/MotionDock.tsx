@@ -119,7 +119,7 @@ export const MotionDock: React.FC<MotionDockProps> = ({
                 </div>
                 <div>
                   <h4 className="text-xs font-bold text-white tracking-wide">Motion & Pond Controller</h4>
-                  <p className="text-[10px] text-rose-300/70">Inspired by motionsites.ai</p>
+                  <p className="text-[10px] text-rose-300/70">Fluid Kinematics & Caustics</p>
                 </div>
               </div>
               
@@ -259,7 +259,7 @@ export const MotionDock: React.FC<MotionDockProps> = ({
                   className="w-full flex items-center justify-center gap-2 py-2 rounded-xl bg-gradient-to-r from-rose-700 to-red-800 hover:from-rose-600 hover:to-red-700 text-white font-semibold text-xs shadow-lg shadow-rose-950/60 transition-all hover:scale-[1.02]"
                 >
                   <GraduationCap className="w-4 h-4" />
-                  <span>Switch to Zen Test-Taker View</span>
+                  <span>Switch to Candidate Test Portal</span>
                 </button>
               </div>
 

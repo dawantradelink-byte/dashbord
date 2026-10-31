@@ -99,7 +99,7 @@ export const VisitorTrendsChart: React.FC<VisitorTrendsChartProps> = ({ language
     : '';
 
   return (
-    <div className="glass-card-glow rounded-2xl p-4.5 flex flex-col justify-between select-none">
+    <div className="glass-card-glow rounded-3xl p-5.5 flex flex-col justify-between select-none transition-all duration-300">
       {/* Header */}
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2.5">
@@ -157,8 +157,8 @@ export const VisitorTrendsChart: React.FC<VisitorTrendsChartProps> = ({ language
           >
             <defs>
               <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#ef4444" stopOpacity="0.45" />
-                <stop offset="60%" stopColor="#dc2626" stopOpacity="0.1" />
+                <stop offset="0%" stopColor="#ef4444" stopOpacity="0.22" />
+                <stop offset="60%" stopColor="#dc2626" stopOpacity="0.05" />
                 <stop offset="100%" stopColor="#991b1b" stopOpacity="0.0" />
               </linearGradient>
             </defs>

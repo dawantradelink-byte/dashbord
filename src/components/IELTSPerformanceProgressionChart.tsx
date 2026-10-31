@@ -222,6 +222,20 @@ export const IELTSPerformanceProgressionChart: React.FC<IELTSPerformanceProgress
         </div>
       </div>
 
+      {ieltsLeads.length === 0 ? (
+        <div className="p-12 text-center rounded-3xl bg-black/20 backdrop-blur-sm border border-white/10">
+          <TrendingUp className="w-10 h-10 text-rose-400/40 mx-auto mb-3" />
+          <h3 className="text-base font-bold text-white">
+            {language === 'en' ? 'Candidate Score Trajectory Template' : 'শিক্ষার্থী স্কোর অগ্রগতির চার্ট'}
+          </h3>
+          <p className="text-xs text-rose-300/70 max-w-md mx-auto mt-1">
+            {language === 'en'
+              ? 'Multi-test progress curves across Listening, Reading, Writing, Speaking, and Target Band will appear here once candidate tests are evaluated.'
+              : 'লিসেনিং, রিডিং, রাইটিং এবং স্পিকিং স্কোর অগ্রগতি চার্ট শিক্ষার্থী মক টেস্ট মূল্যায়নের পর এখানে প্রদর্শিত হবে।'}
+          </p>
+        </div>
+      ) : (
+        <>
       {/* 2. Candidate Selection Tabs */}
       <div className="space-y-2">
         <label className="text-[11px] font-semibold text-rose-300/80 uppercase tracking-wider block">
@@ -243,8 +257,8 @@ export const IELTSPerformanceProgressionChart: React.FC<IELTSPerformanceProgress
                 onClick={() => setSelectedStudentId(cand.id)}
                 className={`p-3.5 rounded-2xl cursor-pointer transition-all border flex items-center justify-between gap-3 ${
                   isSelected
-                    ? 'bg-gradient-to-br from-rose-950/70 via-black/80 to-rose-900/30 border-rose-500/60 shadow-lg shadow-rose-950/40 ring-1 ring-rose-500/40'
-                    : 'bg-black/30 hover:bg-black/50 border-white/5 hover:border-white/15'
+                    ? 'bg-gradient-to-br from-rose-950/30 via-black/25 to-rose-900/20 backdrop-blur-sm border-rose-500/60 shadow-lg shadow-rose-950/40 ring-1 ring-rose-500/40'
+                    : 'bg-black/20 hover:bg-black/35 backdrop-blur-sm border-white/5 hover:border-white/15'
                 }`}
               >
                 <div className="flex items-center gap-2.5 min-w-0">
@@ -284,7 +298,7 @@ export const IELTSPerformanceProgressionChart: React.FC<IELTSPerformanceProgress
 
       {/* 3. Candidate KPI Highlights Bar */}
       {selectedLead && (
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-4 rounded-2xl bg-black/40 border border-white/10">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-4 rounded-2xl bg-black/20 backdrop-blur-sm border border-white/10">
           <div>
             <span className="text-[10px] text-rose-300/70 uppercase tracking-wider block font-medium">Initial Baseline</span>
             <div className="text-lg font-bold font-mono text-white mt-0.5">
@@ -428,7 +442,7 @@ export const IELTSPerformanceProgressionChart: React.FC<IELTSPerformanceProgress
       </div>
 
       {/* 5. Main SVG Performance Progression Chart */}
-      <div className="relative w-full rounded-2xl bg-black/50 border border-white/10 p-4 overflow-hidden">
+      <div className="relative w-full rounded-2xl bg-black/20 backdrop-blur-sm border border-white/10 p-4 overflow-hidden">
         <svg
           className="w-full h-[280px] overflow-visible select-none"
           viewBox={`0 0 ${chartWidth} ${chartHeight}`}
@@ -437,8 +451,8 @@ export const IELTSPerformanceProgressionChart: React.FC<IELTSPerformanceProgress
           <defs>
             {/* Overall Band Gradient Fill */}
             <linearGradient id="progressionOverallGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#c084fc" stopOpacity="0.45" />
-              <stop offset="50%" stopColor="#a855f7" stopOpacity="0.15" />
+              <stop offset="0%" stopColor="#c084fc" stopOpacity="0.22" />
+              <stop offset="50%" stopColor="#a855f7" stopOpacity="0.06" />
               <stop offset="100%" stopColor="#7e22ce" stopOpacity="0.0" />
             </linearGradient>
 
@@ -766,7 +780,7 @@ export const IELTSPerformanceProgressionChart: React.FC<IELTSPerformanceProgress
           </span>
         </div>
 
-        <div className="overflow-x-auto rounded-2xl border border-white/10 bg-black/40">
+        <div className="overflow-x-auto rounded-2xl border border-white/10 bg-black/20 backdrop-blur-sm">
           <table className="w-full text-left text-xs">
             <thead className="bg-white/5 border-b border-white/10 text-rose-300/70 uppercase text-[10px] tracking-wider font-semibold">
               <tr>
@@ -843,6 +857,8 @@ export const IELTSPerformanceProgressionChart: React.FC<IELTSPerformanceProgress
           </table>
         </div>
       </div>
+        </>
+      )}
 
       {/* 7. Modal: Record New Mock Test Attempt */}
       <AnimatePresence>

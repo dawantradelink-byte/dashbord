@@ -11,7 +11,9 @@ import {
   CheckCircle2, 
   Sparkles,
   RotateCcw,
-  Volume2
+  Volume2,
+  Download,
+  FileArchive
 } from 'lucide-react';
 import { storageService, PortalSettings } from '../../services/storageService';
 import { ConfirmDeleteModal } from '../ConfirmDeleteModal';
@@ -174,6 +176,37 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ language, onShowToas
                 className="w-full px-3 py-2 rounded-xl glass-input text-white font-mono"
               />
             </div>
+          </div>
+        </div>
+
+        {/* Project Source Code Package (ZIP) */}
+        <div className="p-6 glass-panel rounded-3xl border border-white/10 shadow-xl space-y-3">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-amber-500/20 border border-amber-400/40 flex items-center justify-center text-amber-300 shrink-0">
+                <FileArchive className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                  <span>Project Source Code Archive</span>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                    ZIP Ready
+                  </span>
+                </h3>
+                <p className="text-[11px] text-rose-200/70 mt-0.5">
+                  Complete repository bundle containing all React components, IELTS calculators, tests, assets, and styling.
+                </p>
+              </div>
+            </div>
+
+            <a
+              href="/nextborder-dashboard-source.zip"
+              download="nextborder-dashboard-source.zip"
+              className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-600 to-rose-600 hover:from-amber-500 hover:to-rose-500 text-white font-bold text-xs shadow-lg shadow-amber-950/40 transition-all hover:scale-105 active:scale-95 shrink-0"
+            >
+              <Download className="w-4 h-4" />
+              <span>Download Complete ZIP</span>
+            </a>
           </div>
         </div>
 

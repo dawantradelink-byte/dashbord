@@ -16,8 +16,8 @@ export const VisitorProfileDonut: React.FC<VisitorProfileDonutProps> = ({ langua
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
 
-  const academicPct = total > 0 ? summary.academicCount / total : 0.5;
-  const generalPct = total > 0 ? summary.generalCount / total : 0.5;
+  const academicPct = total > 0 ? summary.academicCount / total : 0;
+  const generalPct = total > 0 ? summary.generalCount / total : 0;
 
   const academicDash = academicPct * circumference;
   const generalDash = generalPct * circumference;
@@ -26,7 +26,7 @@ export const VisitorProfileDonut: React.FC<VisitorProfileDonutProps> = ({ langua
   const generalDisplay = total > 0 ? Math.round(generalPct * 100) : 0;
 
   return (
-    <div className="glass-card-glow rounded-2xl p-4.5 flex flex-col justify-between select-none">
+    <div className="glass-card-glow rounded-3xl p-5 flex flex-col justify-between select-none transition-all duration-300">
       {/* Header */}
       <div className="flex items-center gap-2.5 mb-2">
         <div className="w-8 h-8 rounded-lg bg-rose-600/30 border border-rose-500/40 flex items-center justify-center text-rose-300">

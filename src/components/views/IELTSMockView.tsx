@@ -119,7 +119,7 @@ export const IELTSMockView: React.FC<IELTSMockViewProps> = ({
             className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-rose-600 to-amber-600 hover:from-rose-500 hover:to-amber-500 text-white font-semibold text-xs shadow-lg shadow-rose-950/40 transition-all hover:scale-105"
           >
             <GraduationCap className="w-4 h-4" />
-            <span>{language === 'en' ? 'Launch Zen Student Test View' : 'জেন স্টুডেন্ট টেস্ট ভিউ খুলুন'}</span>
+            <span>{language === 'en' ? 'Launch Candidate Test Simulator' : 'ক্যান্ডিডেট টেস্ট সিমুলেটর খুলুন'}</span>
           </button>
         </div>
       </div>
@@ -182,17 +182,30 @@ export const IELTSMockView: React.FC<IELTSMockViewProps> = ({
           </div>
 
           {/* IELTS Test Submissions Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            {filtered.map((lead) => {
-              const ielts = lead.ieltsData;
-              const scores = ielts?.scores;
-              const wordCount = ielts?.writingSubmission ? countWords(ielts.writingSubmission) : (ielts?.writingWordCount || 0);
+          {filtered.length === 0 ? (
+            <div className="p-10 text-center glass-panel rounded-3xl border border-white/10 text-rose-300/70">
+              <Award className="w-10 h-10 text-rose-400/40 mx-auto mb-3" />
+              <p className="text-base font-semibold text-white">
+                {language === 'en' ? 'No IELTS mock test submissions found' : 'কোনো আইইএলটিএস মক টেস্ট আবেদন পাওয়া যায়নি'}
+              </p>
+              <p className="text-xs text-rose-300/60 mt-1 max-w-md mx-auto">
+                {language === 'en' 
+                  ? 'Candidate submissions will appear here for examiner scoring, audio feedback, and scorecards.' 
+                  : 'পরীক্ষার্থীর মক টেস্ট সাবমিশন এখানে জমা হবে মূল্যায়ন ও স্কোরকার্ড প্রেরণের জন্য।'}
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              {filtered.map((lead) => {
+                const ielts = lead.ieltsData;
+                const scores = ielts?.scores;
+                const wordCount = ielts?.writingSubmission ? countWords(ielts.writingSubmission) : (ielts?.writingWordCount || 0);
 
-              return (
-                <div
-                  key={lead.id}
-                  className="p-5 rounded-3xl glass-panel border border-white/10 hover:border-rose-500/30 transition-all shadow-xl flex flex-col justify-between"
-                >
+                return (
+                  <div
+                    key={lead.id}
+                    className="p-5 rounded-3xl glass-panel border border-white/10 hover:border-rose-500/30 transition-all shadow-xl flex flex-col justify-between"
+                  >
                   <div>
                     {/* Header Row */}
                     <div className="flex items-start justify-between gap-3 pb-3 border-b border-white/10">
@@ -235,7 +248,7 @@ export const IELTSMockView: React.FC<IELTSMockViewProps> = ({
 
                       {/* Essay Snapshot */}
                       {ielts?.writingSubmission ? (
-                        <div className="p-3 rounded-2xl bg-black/40 border border-white/5 space-y-1">
+                        <div className="p-3 rounded-2xl bg-black/20 backdrop-blur-sm border border-white/5 space-y-1">
                           <div className="flex items-center justify-between text-[11px] text-rose-300">
                             <span className="font-semibold flex items-center gap-1">
                               <FileText className="w-3 h-3 text-rose-400" />
@@ -253,7 +266,7 @@ export const IELTSMockView: React.FC<IELTSMockViewProps> = ({
 
                   {/* Evaluated Band Scores (if scored) */}
                   {scores && (
-                    <div className="p-3 rounded-2xl bg-gradient-to-r from-rose-950/40 to-black/60 border border-rose-500/20">
+                    <div className="p-3 rounded-2xl bg-gradient-to-r from-rose-950/25 to-black/25 backdrop-blur-sm border border-rose-500/20">
                       <div className="flex items-center justify-between mb-2">
                         <span className="text-[11px] font-semibold text-rose-300">Evaluated Scorecard</span>
                         <div className="flex items-center gap-1.5">
@@ -318,6 +331,7 @@ export const IELTSMockView: React.FC<IELTSMockViewProps> = ({
           );
         })}
       </div>
+    )}
         </>
       )}
     </motion.div>

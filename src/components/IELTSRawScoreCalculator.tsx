@@ -208,7 +208,7 @@ export const IELTSRawScoreCalculator: React.FC<IELTSRawScoreCalculatorProps> = (
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         
         {/* LISTENING MODULE */}
-        <div className="p-4.5 rounded-2xl bg-black/40 border border-sky-500/30 space-y-3 relative overflow-hidden">
+        <div className="p-4.5 rounded-2xl bg-black/20 backdrop-blur-sm border border-sky-500/25 space-y-3 relative overflow-hidden">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <div className="w-7 h-7 rounded-lg bg-sky-500/20 border border-sky-400/30 flex items-center justify-center text-sky-300">
@@ -242,7 +242,7 @@ export const IELTSRawScoreCalculator: React.FC<IELTSRawScoreCalculatorProps> = (
                   max="40"
                   value={listeningRaw}
                   onChange={(e) => setListeningRaw(Math.max(0, Math.min(40, parseInt(e.target.value) || 0)))}
-                  className="w-12 text-center py-0.5 px-1 rounded-md bg-black/60 border border-white/20 text-white font-mono font-bold text-xs"
+                  className="w-12 text-center py-0.5 px-1 rounded-md bg-black/30 border border-white/20 text-white font-mono font-bold text-xs"
                 />
                 <button
                   type="button"
@@ -282,7 +282,7 @@ export const IELTSRawScoreCalculator: React.FC<IELTSRawScoreCalculatorProps> = (
         </div>
 
         {/* READING MODULE */}
-        <div className="p-4.5 rounded-2xl bg-black/40 border border-emerald-500/30 space-y-3 relative overflow-hidden">
+        <div className="p-4.5 rounded-2xl bg-black/20 backdrop-blur-sm border border-emerald-500/25 space-y-3 relative overflow-hidden">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <div className="w-7 h-7 rounded-lg bg-emerald-500/20 border border-emerald-400/30 flex items-center justify-center text-emerald-300">
@@ -318,7 +318,7 @@ export const IELTSRawScoreCalculator: React.FC<IELTSRawScoreCalculatorProps> = (
                   max="40"
                   value={readingRaw}
                   onChange={(e) => setReadingRaw(Math.max(0, Math.min(40, parseInt(e.target.value) || 0)))}
-                  className="w-12 text-center py-0.5 px-1 rounded-md bg-black/60 border border-white/20 text-white font-mono font-bold text-xs"
+                  className="w-12 text-center py-0.5 px-1 rounded-md bg-black/30 border border-white/20 text-white font-mono font-bold text-xs"
                 />
                 <button
                   type="button"
@@ -361,7 +361,7 @@ export const IELTSRawScoreCalculator: React.FC<IELTSRawScoreCalculatorProps> = (
 
       {/* Overall Score Prediction Section */}
       {showFullOverall && (
-        <div className="p-4.5 rounded-2xl bg-gradient-to-br from-rose-950/60 to-black/80 border border-white/15 space-y-4">
+        <div className="p-4.5 rounded-2xl bg-gradient-to-br from-rose-950/30 to-black/30 backdrop-blur-sm border border-white/15 space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/10 pb-3">
             <div className="flex items-center gap-2">
               <Award className="w-4 h-4 text-amber-400" />

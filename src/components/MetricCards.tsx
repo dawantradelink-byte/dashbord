@@ -14,13 +14,13 @@ export const MetricCards: React.FC<MetricCardsProps> = ({ language }) => {
       id: 'leads',
       labelEn: 'Total Candidate Inquiries',
       labelBn: 'মোট আবেদনকারী লিড',
-      subEn: `${summary.pendingLeads} pending evaluation`,
-      subBn: `${summary.pendingLeads} টি মূল্যায়নের অপেক্ষায়`,
+      subEn: summary.totalLeads > 0 ? `${summary.pendingLeads} pending evaluation` : 'No inquiries recorded yet',
+      subBn: summary.totalLeads > 0 ? `${summary.pendingLeads} টি মূল্যায়নের অপেক্ষায়` : 'এখনও কোনো লিড রেকর্ড করা হয়নি',
       value: summary.totalLeads.toString(),
-      badge: summary.pendingLeads > 0 ? `${summary.pendingLeads} Pending` : 'Up to date',
+      badge: summary.pendingLeads > 0 ? `${summary.pendingLeads} Pending` : summary.totalLeads > 0 ? 'Up to date' : '0 Leads',
       isGold: false,
       icon: <Users className="w-5 h-5 text-white" />,
-      history: [Math.max(1, summary.totalLeads - 3), Math.max(1, summary.totalLeads - 2), Math.max(1, summary.totalLeads - 1), summary.totalLeads],
+      history: summary.totalLeads > 0 ? [Math.max(1, summary.totalLeads - 3), Math.max(1, summary.totalLeads - 2), Math.max(1, summary.totalLeads - 1), summary.totalLeads] : [0, 0, 0, 0],
       color: '#ef4444'
     },
     {
@@ -30,36 +30,36 @@ export const MetricCards: React.FC<MetricCardsProps> = ({ language }) => {
       subEn: summary.avgBand ? `Average Band Score: ${summary.avgBand}` : 'No evaluated tests yet',
       subBn: summary.avgBand ? `গড় ব্যান্ড স্কোর: ${summary.avgBand}` : 'এখনও কোনো টেস্ট মূল্যায়ন হয়নি',
       value: summary.evaluatedLeads.toString(),
-      badge: summary.avgBand ? `Band ${summary.avgBand}` : 'Awaiting',
+      badge: summary.avgBand ? `Band ${summary.avgBand}` : '0 Tests',
       isGold: false,
       icon: <Award className="w-5 h-5 text-white" />,
-      history: [6.0, 6.5, 7.0, summary.avgBand || 6.5],
+      history: summary.evaluatedLeads > 0 ? [6.0, 6.5, 7.0, summary.avgBand || 6.5] : [0, 0, 0, 0],
       color: '#f43f5e'
     },
     {
       id: 'clients',
       labelEn: 'Enrolled Student Clients',
       labelBn: 'ভর্তি হওয়া শিক্ষার্থী ক্লায়েন্ট',
-      subEn: 'In active admissions pipeline',
-      subBn: 'ভর্তি কার্যক্রমে সক্রিয় রয়েছে',
+      subEn: summary.totalClients > 0 ? 'In active admissions pipeline' : 'No enrolled clients yet',
+      subBn: summary.totalClients > 0 ? 'ভর্তি কার্যক্রমে সক্রিয় রয়েছে' : 'এখনও কোনো শিক্ষার্থী ভর্তি হয়নি',
       value: summary.totalClients.toString(),
-      badge: 'Active Clients',
+      badge: summary.totalClients > 0 ? `${summary.totalClients} Active` : '0 Clients',
       isGold: false,
       icon: <GraduationCap className="w-5 h-5 text-white" />,
-      history: [1, 2, summary.totalClients, summary.totalClients],
+      history: summary.totalClients > 0 ? [1, 2, summary.totalClients, summary.totalClients] : [0, 0, 0, 0],
       color: '#f59e0b'
     },
     {
       id: 'visas',
       labelEn: 'Visa Applications Active',
       labelBn: 'সক্রিয় ভিসা আবেদনসমূহ',
-      subEn: 'USA, Canada, UK, Schengen',
-      subBn: 'ইউএসএ, কানাডা, ইউকে, সেনজেন',
+      subEn: summary.totalVisas > 0 ? 'USA, Canada, UK, Schengen' : 'No visa filings recorded yet',
+      subBn: summary.totalVisas > 0 ? 'ইউএসএ, কানাডা, ইউকে, সেনজেন' : 'এখনও কোনো ভিসা ফাইল তৈরি হয়নি',
       value: summary.totalVisas.toString(),
-      badge: 'In Processing',
+      badge: summary.totalVisas > 0 ? `${summary.totalVisas} In Process` : '0 Visas',
       isGold: true,
       icon: <Plane className="w-5 h-5 text-amber-300" />,
-      history: [1, 2, 2, summary.totalVisas],
+      history: summary.totalVisas > 0 ? [1, 2, 2, summary.totalVisas] : [0, 0, 0, 0],
       color: '#fbbf24'
     }
   ];
@@ -92,7 +92,7 @@ export const MetricCards: React.FC<MetricCardsProps> = ({ language }) => {
       <svg className="w-full h-10 overflow-visible" viewBox={`0 0 ${width} ${height}`}>
         <defs>
           <linearGradient id={`grad-${id}`} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor={color} stopOpacity="0.4" />
+            <stop offset="0%" stopColor={color} stopOpacity="0.22" />
             <stop offset="100%" stopColor={color} stopOpacity="0.0" />
           </linearGradient>
         </defs>
@@ -101,7 +101,7 @@ export const MetricCards: React.FC<MetricCardsProps> = ({ language }) => {
           d={pathD}
           fill="none"
           stroke={color}
-          strokeWidth="2.2"
+          strokeWidth="2.0"
           strokeLinecap="round"
           strokeLinejoin="round"
         />
@@ -110,7 +110,7 @@ export const MetricCards: React.FC<MetricCardsProps> = ({ language }) => {
             key={idx}
             cx={p.x}
             cy={p.y}
-            r={idx === points.length - 1 ? 3.5 : 2}
+            r={idx === points.length - 1 ? 3 : 1.8}
             fill="#ffffff"
             stroke={color}
             strokeWidth="1.5"
@@ -126,7 +126,7 @@ export const MetricCards: React.FC<MetricCardsProps> = ({ language }) => {
         return (
           <div
             key={stat.id}
-            className="glass-card-glow glass-card-hover rounded-2xl p-4.5 flex flex-col justify-between relative overflow-hidden group cursor-pointer"
+            className="glass-card-glow glass-card-hover rounded-3xl p-5 flex flex-col justify-between relative overflow-hidden group cursor-pointer transition-all duration-300"
           >
             {/* Top row: Icon and Titles */}
             <div className="flex items-start gap-3.5">

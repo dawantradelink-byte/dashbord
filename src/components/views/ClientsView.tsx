@@ -274,12 +274,32 @@ export const ClientsView: React.FC<ClientsViewProps> = ({ language }) => {
       </div>
 
       {/* Student Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {filtered.map((client) => (
-          <div
-            key={client.id}
-            className="p-5 rounded-3xl glass-panel border border-white/10 hover:border-rose-500/30 transition-all shadow-xl flex flex-col justify-between"
+      {filtered.length === 0 ? (
+        <div className="p-12 text-center rounded-3xl glass-panel border border-white/10 text-rose-300/70">
+          <GraduationCap className="w-10 h-10 text-rose-400/40 mx-auto mb-3" />
+          <h3 className="text-base font-bold text-white">
+            {language === 'en' ? 'No enrolled student records found' : 'কোনো শিক্ষার্থী ক্লায়েন্ট পাওয়া যায়নি'}
+          </h3>
+          <p className="text-xs text-rose-300/60 mt-1 max-w-md mx-auto mb-4">
+            {language === 'en' 
+              ? 'Add students who have enrolled for visa counseling, university admissions, or IELTS training.' 
+              : 'ভর্তি হওয়া শিক্ষার্থী প্রোফাইল যোগ করতে উপরের "+ Add Student Client" বাটনে ক্লিক করুন।'}
+          </p>
+          <button
+            onClick={() => setIsAdding(true)}
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-rose-600 to-amber-600 hover:from-rose-500 hover:to-amber-500 text-white text-xs font-bold transition-all shadow-md"
           >
+            <Plus className="w-4 h-4" />
+            <span>{language === 'en' ? 'Enroll New Student' : 'নতুন শিক্ষার্থী যোগ করুন'}</span>
+          </button>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {filtered.map((client) => (
+            <div
+              key={client.id}
+              className="p-5 rounded-3xl glass-panel border border-white/10 hover:border-rose-500/30 transition-all shadow-xl flex flex-col justify-between"
+            >
             <div>
               <div className="flex items-start justify-between gap-3 pb-3 border-b border-white/10">
                 <div>
@@ -356,6 +376,7 @@ export const ClientsView: React.FC<ClientsViewProps> = ({ language }) => {
           </div>
         ))}
       </div>
+      )}
 
       <ConfirmDeleteModal
         isOpen={!!clientToDelete}

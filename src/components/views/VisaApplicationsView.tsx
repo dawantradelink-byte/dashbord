@@ -271,8 +271,23 @@ export const VisaApplicationsView: React.FC<VisaApplicationsViewProps> = ({ lang
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
-              {filtered.map((visa) => (
-                <tr key={visa.id} className="hover:bg-white/[0.04] transition-colors">
+              {filtered.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="py-12 text-center text-rose-300/70">
+                    <div className="flex flex-col items-center justify-center gap-2">
+                      <FileText className="w-8 h-8 text-rose-400/40" />
+                      <p className="text-sm font-medium text-white/80">
+                        {language === 'en' ? 'No visa applications recorded yet.' : 'কোনো ভিসা আবেদন পাওয়া যায়নি।'}
+                      </p>
+                      <p className="text-xs text-rose-300/50">
+                        {language === 'en' ? 'Click "+ Add Visa File" above to record a new visa filing.' : 'নতুন ভিসা ফাইল যোগ করতে উপরের "+ Add Visa File" বাটনে ক্লিক করুন।'}
+                      </p>
+                    </div>
+                  </td>
+                </tr>
+              ) : (
+                filtered.map((visa) => (
+                  <tr key={visa.id} className="hover:bg-white/[0.04] transition-colors">
                   <td className="py-3.5 px-4 font-bold text-white text-sm">
                     {visa.studentName}
                   </td>
@@ -325,7 +340,7 @@ export const VisaApplicationsView: React.FC<VisaApplicationsViewProps> = ({ lang
                     </button>
                   </td>
                 </tr>
-              ))}
+              )))}
             </tbody>
           </table>
         </div>

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { NextBorderLogo } from './NextBorderLogo';
 import { 
   Home, 
@@ -14,7 +14,9 @@ import {
   Settings, 
   ExternalLink,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Pin,
+  PinOff
 } from 'lucide-react';
 
 export type NavTab = 
@@ -33,18 +35,32 @@ export type NavTab =
 interface SidebarProps {
   activeTab: NavTab;
   onSelectTab: (tab: NavTab) => void;
-  collapsed: boolean;
-  onToggleCollapse: () => void;
+  collapsed?: boolean;
+  onToggleCollapse?: () => void;
   language: 'en' | 'bn';
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
   activeTab,
   onSelectTab,
-  collapsed,
+  collapsed = true,
   onToggleCollapse,
   language
 }) => {
+  const [isHovered, setIsHovered] = useState<boolean>(false);
+  const [isPinned, setIsPinned] = useState<boolean>(false);
+
+  // Expands smoothly on hover, collapses on mouse leave unless user explicitly pinned it open
+  const isExpanded = isPinned || isHovered;
+
+  const togglePin = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsPinned((prev) => !prev);
+    if (onToggleCollapse) {
+      onToggleCollapse();
+    }
+  };
+
   const navItems: { id: NavTab; labelEn: string; labelBn: string; icon: React.FC<{ className?: string }> }[] = [
     { id: 'Dashboard', labelEn: 'Dashboard', labelBn: 'ড্যাশবোর্ড', icon: Home },
     { id: 'Leads & Inquiries', labelEn: 'Leads & Inquiries', labelBn: 'লিডস ও অনুসন্ধান', icon: Users },
@@ -61,41 +77,56 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   return (
     <aside
-      className={`relative z-20 flex flex-col justify-between border-r border-white/10 glass-panel transition-all duration-300 select-none ${
-        collapsed ? 'w-20' : 'w-64 md:w-72'
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      className={`relative z-20 flex flex-col justify-between border-r border-white/10 glass-panel select-none overflow-hidden transition-all duration-300 ease-in-out shrink-0 ${
+        isExpanded 
+          ? 'w-64 md:w-72 shadow-2xl shadow-rose-950/70 border-rose-500/30' 
+          : 'w-20 shadow-lg'
       }`}
     >
       {/* Top Branding Section */}
-      <div className="p-5 flex flex-col items-center border-b border-white/10">
+      <div className="p-4 flex flex-col items-center border-b border-white/10 transition-all duration-300">
         <div className="flex items-center justify-between w-full">
-          {!collapsed ? (
-            <div className="flex flex-col items-center mx-auto text-center cursor-pointer group">
-              <div className="relative transform group-hover:scale-105 transition-transform duration-300">
-                <NextBorderLogo size={82} />
-              </div>
-              <h2 className="text-sm font-bold tracking-wider text-white uppercase mt-2.5">NEXT BORDER</h2>
-              <span className="text-[10px] tracking-widest text-amber-300/80 font-medium uppercase mt-0.5">
-                VISA CONSULTANCY
-              </span>
-            </div>
-          ) : (
-            <div className="mx-auto cursor-pointer hover:scale-105 transition-transform">
-              <NextBorderLogo size={44} />
-            </div>
-          )}
-
-          <button
-            onClick={onToggleCollapse}
-            className="hidden md:flex p-1.5 rounded-lg text-rose-300 hover:text-white hover:bg-white/10 transition-colors"
-            title={collapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
+          <div 
+            onClick={() => onSelectTab('Dashboard')}
+            className="flex flex-col items-center mx-auto text-center cursor-pointer group"
           >
-            {collapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
-          </button>
+            <div className="relative transform group-hover:scale-105 transition-transform duration-300">
+              <NextBorderLogo size={isExpanded ? 76 : 42} />
+            </div>
+
+            {isExpanded && (
+              <div className="mt-2 text-center animate-in fade-in duration-200">
+                <h2 className="text-sm font-bold tracking-wider text-white uppercase whitespace-nowrap">
+                  NEXT BORDER
+                </h2>
+                <span className="text-[10px] tracking-widest text-amber-300/80 font-medium uppercase block whitespace-nowrap">
+                  VISA CONSULTANCY
+                </span>
+              </div>
+            )}
+          </div>
+
+          {/* Pin open toggle button */}
+          {isExpanded && (
+            <button
+              onClick={togglePin}
+              className={`p-1.5 rounded-lg text-xs transition-colors shrink-0 ${
+                isPinned 
+                  ? 'bg-rose-600/40 text-rose-100 hover:bg-rose-600/60 border border-rose-400/40' 
+                  : 'text-rose-300/60 hover:text-white hover:bg-white/10'
+              }`}
+              title={isPinned ? 'Pinned open (Click to auto-collapse on hover)' : 'Pin sidebar open'}
+            >
+              {isPinned ? <PinOff className="w-3.5 h-3.5" /> : <Pin className="w-3.5 h-3.5" />}
+            </button>
+          )}
         </div>
       </div>
 
       {/* Navigation Items */}
-      <div className="flex-1 py-4 px-3 space-y-1.5 overflow-y-auto">
+      <div className="flex-1 py-3 px-2.5 space-y-1.5 overflow-y-auto">
         {navItems.map((item) => {
           const Icon = item.icon;
           const isActive = activeTab === item.id;
@@ -105,30 +136,49 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <button
               key={item.id}
               onClick={() => onSelectTab(item.id)}
-              className={`w-full flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-xs md:text-sm font-medium transition-all ${
+              className={`w-full flex items-center rounded-xl text-xs md:text-sm font-medium transition-all group relative ${
+                isExpanded ? 'gap-3.5 px-3 py-2.5 text-left' : 'justify-center p-2.5'
+              } ${
                 isActive
                   ? 'glass-pill-active text-white font-semibold shadow-lg'
                   : 'text-rose-200/75 hover:text-white hover:bg-white/5'
               }`}
-              title={label}
+              title={!isExpanded ? label : undefined}
             >
-              <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-white' : 'text-rose-300/80'}`} />
-              {!collapsed && <span className="truncate">{label}</span>}
+              <Icon className={`w-4 h-4 shrink-0 transition-transform group-hover:scale-110 ${isActive ? 'text-white' : 'text-rose-300/80'}`} />
+              
+              {isExpanded && (
+                <span className="truncate animate-in fade-in duration-200">{label}</span>
+              )}
+
+              {/* Floating Tooltip in collapsed icon mode */}
+              {!isExpanded && (
+                <span className="absolute left-full ml-3 px-2.5 py-1 rounded-lg glass-panel bg-rose-950/95 text-white text-xs font-semibold whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity z-50 shadow-2xl border border-rose-500/40">
+                  {label}
+                </span>
+              )}
             </button>
           );
         })}
       </div>
 
-      {/* Bottom Visit Website Action (Image 1 replica) */}
-      <div className="p-4 border-t border-white/10">
+      {/* Bottom Visit Website Action */}
+      <div className="p-3 border-t border-white/10">
         <a
-          href="https://motionsites.ai/"
+          href="https://nextborder.com"
           target="_blank"
           rel="noopener noreferrer"
-          className="w-full flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl glass-panel border-white/15 text-xs font-semibold text-rose-200 hover:text-white hover:bg-rose-900/30 transition-all shadow-sm"
+          className={`w-full flex items-center justify-center rounded-xl glass-panel border-white/15 text-xs font-semibold text-rose-200 hover:text-white hover:bg-rose-900/30 transition-all shadow-sm ${
+            isExpanded ? 'gap-2 px-3 py-2.5' : 'p-2.5'
+          }`}
+          title={!isExpanded ? (language === 'en' ? 'Visit NextBorder' : 'নেক্সট বর্ডার দেখুন') : undefined}
         >
-          <ExternalLink className="w-3.5 h-3.5" />
-          {!collapsed && <span>{language === 'en' ? 'Visit Website' : 'ওয়েবসাইট দেখুন'}</span>}
+          <ExternalLink className="w-3.5 h-3.5 shrink-0" />
+          {isExpanded && (
+            <span className="truncate animate-in fade-in duration-200">
+              {language === 'en' ? 'NextBorder Portal' : 'নেক্সট বর্ডার পোর্টাল'}
+            </span>
+          )}
         </a>
       </div>
     </aside>

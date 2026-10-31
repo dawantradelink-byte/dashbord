@@ -80,7 +80,20 @@ export const AIBlogInspectorView: React.FC<AIBlogInspectorViewProps> = ({ langua
       </div>
 
       {/* Main Inspection Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+      {blogs.length === 0 ? (
+        <div className="p-12 text-center rounded-3xl glass-panel border border-white/10 text-rose-300/70">
+          <Cpu className="w-10 h-10 text-rose-400/40 mx-auto mb-3" />
+          <h3 className="text-base font-bold text-white">
+            {language === 'en' ? 'No articles queued for AI inspection' : 'এআই মান যাচাইয়ের জন্য কোনো আর্টিকেল নেই'}
+          </h3>
+          <p className="text-xs text-rose-300/60 mt-1 max-w-md mx-auto">
+            {language === 'en'
+              ? 'Draft study guides or articles created in the Blog Manager will appear here for academic quality and factual verification.'
+              : 'ব্লগ ম্যানেজারে সংরক্ষিত ড্রাফট আর্টিকেল এখানে গুণমান ও নির্ভুলতা যাচাইয়ের জন্য আসবে।'}
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
         
         {/* Left: Article Selector (4 cols) */}
         <div className="lg:col-span-4 space-y-3">
@@ -206,6 +219,7 @@ export const AIBlogInspectorView: React.FC<AIBlogInspectorViewProps> = ({ langua
         )}
 
       </div>
+      )}
     </motion.div>
   );
 };

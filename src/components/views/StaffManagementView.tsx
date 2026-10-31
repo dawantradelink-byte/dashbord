@@ -61,69 +61,83 @@ export const StaffManagementView: React.FC<StaffManagementViewProps> = ({ langua
       </div>
 
       {/* Staff Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-        {staff.map((member) => (
-          <div
-            key={member.id}
-            className="p-6 rounded-3xl glass-panel border border-white/10 hover:border-rose-500/30 transition-all shadow-xl flex flex-col justify-between"
-          >
-            <div>
-              <div className="flex items-start justify-between">
-                <img
-                  src={member.avatar}
-                  alt={member.name}
-                  className="w-16 h-16 rounded-2xl object-cover border-2 border-rose-500/40 shadow-lg"
-                />
-                <button
-                  onClick={() => handleToggleStatus(member.id)}
-                  className={`px-2.5 py-1 rounded-full text-[10px] font-bold border transition-all ${
-                    member.activeStatus
-                      ? 'bg-emerald-500/20 text-emerald-300 border-emerald-400/30'
-                      : 'bg-rose-950/60 text-rose-400 border-rose-500/20'
-                  }`}
-                >
-                  {member.activeStatus ? 'Active' : 'On Leave'}
-                </button>
+      {staff.length === 0 ? (
+        <div className="p-12 text-center rounded-3xl glass-panel border border-white/10 text-rose-300/70">
+          <UserCheck className="w-10 h-10 text-rose-400/40 mx-auto mb-3" />
+          <h3 className="text-base font-bold text-white">
+            {language === 'en' ? 'Staff Directory Template Shell' : 'স্টাফ ও পরামর্শক ডিরেক্টরি'}
+          </h3>
+          <p className="text-xs text-rose-300/60 mt-1 max-w-md mx-auto">
+            {language === 'en'
+              ? 'Team profiles, counselor allocations, and examiner certifications will be listed here.'
+              : 'পরামর্শক, পরীক্ষক ও স্টাফ সদস্যদের প্রোফাইল তথ্য এখানে প্রদর্শিত হবে।'}
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          {staff.map((member) => (
+            <div
+              key={member.id}
+              className="p-6 rounded-3xl glass-panel border border-white/10 hover:border-rose-500/30 transition-all shadow-xl flex flex-col justify-between"
+            >
+              <div>
+                <div className="flex items-start justify-between">
+                  <img
+                    src={member.avatar}
+                    alt={member.name}
+                    className="w-16 h-16 rounded-2xl object-cover border-2 border-rose-500/40 shadow-lg"
+                  />
+                  <button
+                    onClick={() => handleToggleStatus(member.id)}
+                    className={`px-2.5 py-1 rounded-full text-[10px] font-bold border transition-all ${
+                      member.activeStatus
+                        ? 'bg-emerald-500/20 text-emerald-300 border-emerald-400/30'
+                        : 'bg-rose-950/60 text-rose-400 border-rose-500/20'
+                    }`}
+                  >
+                    {member.activeStatus ? 'Active' : 'On Leave'}
+                  </button>
+                </div>
+
+                <div className="mt-4">
+                  <h3 className="font-bold text-white text-base">{member.name}</h3>
+                  <p className="text-xs font-medium text-rose-300/80 mt-0.5">{member.role}</p>
+                  <span className="inline-block mt-2 px-2.5 py-0.5 rounded-lg bg-white/5 border border-white/10 text-[10px] font-mono text-amber-300">
+                    {member.department}
+                  </span>
+                </div>
+
+                <div className="mt-4 space-y-2 text-xs text-rose-200/80">
+                  <a
+                    href={`mailto:${member.email}`}
+                    className="flex items-center gap-2 hover:text-white transition-colors"
+                  >
+                    <Mail className="w-3.5 h-3.5 text-rose-400 shrink-0" />
+                    <span className="truncate">{member.email}</span>
+                  </a>
+                  <a
+                    href={`https://wa.me/${member.phone.replace(/[^0-9]/g, '')}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 hover:text-emerald-300 transition-colors font-mono text-emerald-400"
+                  >
+                    <Phone className="w-3.5 h-3.5 shrink-0" />
+                    <span>{member.phone}</span>
+                  </a>
+                </div>
               </div>
 
-              <div className="mt-4">
-                <h3 className="font-bold text-white text-base">{member.name}</h3>
-                <p className="text-xs font-medium text-rose-300/80 mt-0.5">{member.role}</p>
-                <span className="inline-block mt-2 px-2.5 py-0.5 rounded-lg bg-white/5 border border-white/10 text-[10px] font-mono text-amber-300">
-                  {member.department}
+              <div className="mt-5 pt-3 border-t border-white/10 flex items-center justify-between text-[11px] text-rose-300/60 font-mono">
+                <span>Next Border Official</span>
+                <span className="text-emerald-400 flex items-center gap-1">
+                  <ShieldCheck className="w-3.5 h-3.5" />
+                  Verified
                 </span>
               </div>
-
-              <div className="mt-4 space-y-2 text-xs text-rose-200/80">
-                <a
-                  href={`mailto:${member.email}`}
-                  className="flex items-center gap-2 hover:text-white transition-colors"
-                >
-                  <Mail className="w-3.5 h-3.5 text-rose-400 shrink-0" />
-                  <span className="truncate">{member.email}</span>
-                </a>
-                <a
-                  href={`https://wa.me/${member.phone.replace(/[^0-9]/g, '')}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 hover:text-emerald-300 transition-colors font-mono text-emerald-400"
-                >
-                  <Phone className="w-3.5 h-3.5 shrink-0" />
-                  <span>{member.phone}</span>
-                </a>
-              </div>
             </div>
-
-            <div className="mt-5 pt-3 border-t border-white/10 flex items-center justify-between text-[11px] text-rose-300/60 font-mono">
-              <span>Next Border Official</span>
-              <span className="text-emerald-400 flex items-center gap-1">
-                <ShieldCheck className="w-3.5 h-3.5" />
-                Verified
-              </span>
-            </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </motion.div>
   );
 };

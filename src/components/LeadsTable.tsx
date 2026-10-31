@@ -134,7 +134,7 @@ export const LeadsTable: React.FC<LeadsTableProps> = ({
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-white/10 pb-4">
         
         {/* Tabs Bar */}
-        <div className="flex items-center gap-1.5 overflow-x-auto w-full md:w-auto p-1 rounded-2xl bg-black/40 border border-white/10">
+        <div className="flex items-center gap-1.5 overflow-x-auto w-full md:w-auto p-1 rounded-2xl bg-black/20 border border-white/10">
           {[
             { id: 'Latest Leads', labelEn: 'Latest Leads', labelBn: 'সর্বশেষ লিড', icon: Users },
             { id: 'IELTS Mock Test', labelEn: 'IELTS Mock Test', labelBn: 'আইইএলটিএস মক টেস্ট', icon: Award },
@@ -199,9 +199,9 @@ export const LeadsTable: React.FC<LeadsTableProps> = ({
       </div>
 
       {/* Leads Table Container */}
-      <div className="overflow-x-auto mt-2 rounded-2xl border border-white/10 bg-black/20">
+      <div className="overflow-x-auto mt-2 rounded-2xl border border-white/10 bg-black/15">
         <table className="w-full text-left text-xs text-rose-100 min-w-[950px]">
-          <thead className="bg-rose-950/40 text-[11px] font-semibold text-rose-200/70 uppercase tracking-wider border-b border-white/10">
+          <thead className="bg-white/[0.04] text-[11px] font-semibold text-rose-200/70 uppercase tracking-wider border-b border-white/10">
             <tr>
               <th className="p-3 w-10 text-center">
                 <input
@@ -224,16 +224,31 @@ export const LeadsTable: React.FC<LeadsTableProps> = ({
           </thead>
 
           <tbody className="divide-y divide-white/5">
-            {filteredLeads.map((lead, idx) => {
-              const isSelected = selectedIds.includes(lead.id);
+            {filteredLeads.length === 0 ? (
+              <tr>
+                <td colSpan={9} className="py-12 text-center text-rose-300/70">
+                  <div className="flex flex-col items-center justify-center gap-2">
+                    <Users className="w-8 h-8 text-rose-400/40" />
+                    <p className="text-sm font-medium text-white/80">
+                      {language === 'en' ? 'No candidate inquiries recorded yet.' : 'এখনও কোনো আবেদনকারীর তথ্য পাওয়া যায়নি।'}
+                    </p>
+                    <p className="text-xs text-rose-300/50">
+                      {language === 'en' ? 'Click "+ Add Lead" above to record a new student inquiry.' : 'নতুন শিক্ষার্থী লিড যোগ করতে উপরের "+ Add Lead" বাটনে ক্লিক করুন।'}
+                    </p>
+                  </div>
+                </td>
+              </tr>
+            ) : (
+              filteredLeads.map((lead, idx) => {
+                const isSelected = selectedIds.includes(lead.id);
 
-              return (
-                <tr
-                  key={lead.id}
-                  className={`hover:bg-rose-900/25 transition-colors ${
-                    isSelected ? 'bg-rose-900/40' : ''
-                  }`}
-                >
+                return (
+                  <tr
+                    key={lead.id}
+                    className={`hover:bg-rose-900/25 transition-colors ${
+                      isSelected ? 'bg-rose-900/40' : ''
+                    }`}
+                  >
                   {/* Checkbox */}
                   <td className="p-3 text-center">
                     <input
@@ -399,7 +414,7 @@ export const LeadsTable: React.FC<LeadsTableProps> = ({
                   </td>
                 </tr>
               );
-            })}
+            }))}
           </tbody>
         </table>
       </div>

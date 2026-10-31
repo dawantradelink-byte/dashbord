@@ -15,6 +15,7 @@ import { ConfirmDeleteModal } from './components/ConfirmDeleteModal';
 import { ZenTestTakerView } from './components/ZenTestTakerView';
 import { MotionDock } from './components/MotionDock';
 import { MotionSitesModal, MotionTheme } from './components/MotionSitesModal';
+import { KoiPondControlsPanel } from './components/KoiPondControlsPanel';
 import { ToastContainer, ToastMessage } from './components/Toast';
 import { WaterCursorEffect } from './components/WaterCursorEffect';
 import { UpperTabsBar } from './components/UpperTabsBar';
@@ -38,7 +39,7 @@ import { Lead, LeadStatus, IELTSScoreBreakdown, IELTSMockTestHistoryEntry } from
 export default function App() {
   const [adminMode, setAdminMode] = useState<boolean>(true);
   const [activeTab, setActiveTab] = useState<NavTab>('Dashboard');
-  const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(true);
   const [language, setLanguage] = useState<'en' | 'bn'>('en');
   const [searchQuery, setSearchQuery] = useState<string>('');
   
@@ -321,26 +322,12 @@ export default function App() {
                 </AnimatePresence>
 
                 {/* Footer Subtext */}
-                <footer className="pt-6 pb-4 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between text-xs text-rose-300/50">
+                <footer className="pt-6 pb-4 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between text-xs text-rose-300/60">
                   <div>
                     Next Border Visa Consultancy © 2026. All rights reserved. Ishak Dawan Admin Console.
                   </div>
                   <div className="flex items-center gap-4 mt-2 sm:mt-0">
-                    <button
-                      onClick={() => setAdminMode(false)}
-                      className="hover:text-rose-200 transition-colors flex items-center gap-1 text-rose-300/80"
-                    >
-                      <span>Zen Student Test Mode</span>
-                    </button>
-                    <span>·</span>
-                    <a
-                      href="https://motionsites.ai/"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="hover:text-rose-200 transition-colors flex items-center gap-1 font-mono text-rose-400"
-                    >
-                      <span>Motionsites.ai Inspired</span>
-                    </a>
+                    <span className="text-rose-200/80">Next Border Global Portal</span>
                     <span>·</span>
                     <span className="font-mono text-emerald-400">Pond Physics: Active 🎏</span>
                   </div>
