@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { AdminAuthGate } from './components/AdminAuthGate';
 import { motion, AnimatePresence } from 'motion/react';
 import { KoiPondCanvas } from './components/KoiPondCanvas';
 import { Header } from './components/Header';
@@ -36,7 +37,7 @@ import { INITIAL_LEADS } from './data/mockData';
 import { storageService } from './services/storageService';
 import { Lead, LeadStatus, IELTSScoreBreakdown, IELTSMockTestHistoryEntry } from './types';
 
-export default function App() {
+function DashboardApp() {
   const [adminMode, setAdminMode] = useState<boolean>(true);
   const [activeTab, setActiveTab] = useState<NavTab>('Dashboard');
   const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(true);
@@ -413,5 +414,16 @@ export default function App() {
       />
 
     </div>
+  );
+}
+
+
+/** Secure Supabase admin gate. Dashboard content is never rendered before the
+ * authenticated user has an explicit admin role in public.user_roles. */
+export default function App() {
+  return (
+    <AdminAuthGate>
+      <DashboardApp />
+    </AdminAuthGate>
   );
 }
