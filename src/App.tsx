@@ -38,6 +38,7 @@ import { storageService } from './services/storageService';
 import { Lead, LeadStatus, IELTSScoreBreakdown, IELTSMockTestHistoryEntry, NotificationItem } from './types';
 
 function DashboardApp() {
+  const { accessToken } = useAdminSession();
   const [adminMode, setAdminMode] = useState<boolean>(true);
   const [activeTab, setActiveTab] = useState<NavTab>('Dashboard');
   const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(true);
