@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { AdminAuthGate } from './components/AdminAuthGate';
+import { AdminAuthGate, useAdminSession } from './components/AdminAuthGate';
 import { motion, AnimatePresence } from 'motion/react';
 import { KoiPondCanvas } from './components/KoiPondCanvas';
 import { Header } from './components/Header';
@@ -35,7 +35,7 @@ import { SettingsView } from './components/views/SettingsView';
 
 import { INITIAL_LEADS } from './data/mockData';
 import { storageService } from './services/storageService';
-import { Lead, LeadStatus, IELTSScoreBreakdown, IELTSMockTestHistoryEntry } from './types';
+import { Lead, LeadStatus, IELTSScoreBreakdown, IELTSMockTestHistoryEntry, NotificationItem } from './types';
 
 function DashboardApp() {
   const [adminMode, setAdminMode] = useState<boolean>(true);
@@ -46,6 +46,63 @@ function DashboardApp() {
   
   // Persistent Leads state initialized from StorageService
   const [leads, setLeads] = useState<Lead[]>(() => storageService.getLeads(INITIAL_LEADS));
+
+  // Load the existing public enquiry CRM from Supabase using the verified admin session.
+  // Current RLS grants admins SELECT access; this client intentionally does not pretend
+  // that status edits/deletes are persisted where the database has no write policy.
+  useEffect(() => {
+    if (!accessToken) return;
+    let alive = true;
+    const loadEnquiries = async () => {
+      try {
+        const base = (import.meta.env.VITE_SUPABASE_URL || '').replace(/\\/$/, '');
+        const key = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+        const response = await fetch(`${base}/rest/v1/enquiries?select=id,created_at,name,mobile,email,service,country,question,source_page,status&order=created_at.desc&limit=250`, {
+          headers: { apikey: key, Authorization: `Bearer ${accessToken}` }
+        });
+        if (!response.ok) throw new Error(`CRM request failed (${response.status})`);
+        const rows = await response.json();
+        if (!alive || !Array.isArray(rows)) return;
+        const mapped: Lead[] = rows.map((row: any) => {
+          const service = String(row.service || 'USA Admission');
+          const type: Lead['type'] = /ielts/i.test(service) ? 'IELTS Mock Test' :
+            /canada/i.test(service) ? 'Canada Study' :
+            /uk|united kingdom/i.test(service) ? 'UK Student Visa' :
+            /australia/i.test(service) ? 'Australia Study' :
+            /tour|visit/i.test(service) ? 'Tourist Visa' : 'USA Admission';
+          const rawStatus = String(row.status || 'NEW').toUpperCase();
+          const status: LeadStatus = rawStatus.includes('CONTACT') ? 'Contacted' :
+            rawStatus.includes('REVIEW') ? 'Reviewed' :
+            rawStatus.includes('EVALUAT') ? 'Evaluated' :
+            rawStatus.includes('SEND') ? 'Result Sent' : 'New';
+          const created = row.created_at ? new Date(row.created_at) : new Date();
+          return {
+            id: String(row.id), name: String(row.name || 'Unknown'),
+            avatar: '', type, source: row.source_page ? 'Landing Page' : 'Website',
+            phone: String(row.mobile || ''), email: String(row.email || ''),
+            message: [row.country ? `Country: ${row.country}` : '', row.question || ''].filter(Boolean).join(' · '),
+            date: created.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }),
+            status, createdAt: created.toISOString()
+          };
+        });
+        setLeads(mapped);
+      } catch (error) {
+        console.error('Unable to load Supabase CRM enquiries:', error);
+      }
+    };
+    loadEnquiries();
+    const timer = window.setInterval(loadEnquiries, 30000);
+    return () => { alive = false; window.clearInterval(timer); };
+  }, [accessToken]);
+
+  const liveNotifications: NotificationItem[] = leads.slice(0, 5).map((lead) => ({
+    id: lead.id,
+    title: 'New candidate enquiry',
+    time: lead.createdAt ? new Date(lead.createdAt).toLocaleString() : lead.date,
+    type: lead.type === 'IELTS Mock Test' ? 'mock_test' : lead.type.includes('Visa') ? 'visa' : 'urgent',
+    studentName: lead.name,
+    read: false
+  }));
   
   // Motion Theme (Motionsites.ai inspiration)
   const [motionTheme, setMotionTheme] = useState<MotionTheme>('pond');
