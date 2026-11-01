@@ -55,7 +55,7 @@ function DashboardApp() {
     let alive = true;
     const loadEnquiries = async () => {
       try {
-        const base = (import.meta.env.VITE_SUPABASE_URL || '').replace(/\\/$/, '');
+        const base = (import.meta.env.VITE_SUPABASE_URL || '').replace(/\/$/, '');
         const key = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY || '';
         const response = await fetch(`${base}/rest/v1/enquiries?select=id,created_at,name,mobile,email,service,country,question,source_page,status&order=created_at.desc&limit=250`, {
           headers: { apikey: key, Authorization: `Bearer ${accessToken}` }
