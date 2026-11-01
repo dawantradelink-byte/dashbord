@@ -10,7 +10,7 @@ type StoredSession = {
 
 const SESSION_KEY = 'nb_admin_session_v1';
 const supabaseUrl = (import.meta.env.VITE_SUPABASE_URL || '').replace(/\/$/, '');
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || '';
 
 async function authRequest(path: string, init: RequestInit = {}) {
   if (!supabaseUrl || !supabaseAnonKey) {
