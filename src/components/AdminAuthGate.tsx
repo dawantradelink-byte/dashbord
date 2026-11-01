@@ -1,4 +1,4 @@
-import React, { FormEvent, ReactNode, useEffect, useState } from 'react';
+import React, { createContext, FormEvent, ReactNode, useContext, useEffect, useState } from 'react';
 
 type StoredSession = {
   access_token: string;
@@ -60,7 +60,7 @@ async function refreshSession(session: StoredSession): Promise<StoredSession> {
   };
 }
 
-type Props = { children: ReactNode };
+type Props = { children: ReactNode };\n\nconst AdminSessionContext = createContext<{ accessToken: string }>({ accessToken: '' });\nexport const useAdminSession = () => useContext(AdminSessionContext);
 
 export function AdminAuthGate({ children }: Props) {
   const [session, setSession] = useState<StoredSession | null>(null);
