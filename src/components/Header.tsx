@@ -40,7 +40,8 @@ export const Header: React.FC<HeaderProps> = ({
   onToggleAdminMode,
   onSelectLeadById,
   onOpenMotionModal,
-  activeTheme = 'pond'
+  activeTheme = 'pond',
+  liveNotifications
 }) => {
   const [isAudioPlaying, setIsAudioPlaying] = useState<boolean>(false);
   const [showNotifications, setShowNotifications] = useState<boolean>(false);
