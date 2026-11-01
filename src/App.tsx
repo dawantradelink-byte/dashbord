@@ -301,7 +301,7 @@ function DashboardApp() {
         return <AIBlogInspectorView key="aiblog" language={language} />;
 
       case 'Blog Manager':
-        return <BlogManagerView key="blogmgr" language={language} />;
+        return <BlogManagerView key="blogmgr" language={language} accessToken={accessToken} />;
 
       case 'Staff Management':
         return <StaffManagementView key="staff" language={language} />;
