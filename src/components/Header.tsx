@@ -27,7 +27,8 @@ interface HeaderProps {
   onToggleAdminMode: () => void;
   onSelectLeadById?: (id: string) => void;
   onOpenMotionModal?: () => void;
-  activeTheme?: string;\n  liveNotifications?: NotificationItem[];
+  activeTheme?: string;
+  liveNotifications?: NotificationItem[];
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -43,7 +44,11 @@ export const Header: React.FC<HeaderProps> = ({
 }) => {
   const [isAudioPlaying, setIsAudioPlaying] = useState<boolean>(false);
   const [showNotifications, setShowNotifications] = useState<boolean>(false);
-  const [notifications, setNotifications] = useState<NotificationItem[]>(liveNotifications || NOTIFICATIONS);\n\n  useEffect(() => {\n    if (liveNotifications) setNotifications(liveNotifications);\n  }, [liveNotifications]);
+  const [notifications, setNotifications] = useState<NotificationItem[]>(liveNotifications || NOTIFICATIONS);
+
+  useEffect(() => {
+    if (liveNotifications) setNotifications(liveNotifications);
+  }, [liveNotifications]);
   const [currentTime, setCurrentTime] = useState<string>('Today 19 Oct 2026, 11:05 AM');
 
   // Real-time clock formatted like the screenshot
