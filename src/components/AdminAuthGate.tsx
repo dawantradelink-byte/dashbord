@@ -60,7 +60,10 @@ async function refreshSession(session: StoredSession): Promise<StoredSession> {
   };
 }
 
-type Props = { children: ReactNode };\n\nconst AdminSessionContext = createContext<{ accessToken: string }>({ accessToken: '' });\nexport const useAdminSession = () => useContext(AdminSessionContext);
+type Props = { children: ReactNode };
+
+const AdminSessionContext = createContext<{ accessToken: string }>({ accessToken: '' });
+export const useAdminSession = () => useContext(AdminSessionContext);
 
 export function AdminAuthGate({ children }: Props) {
   const [session, setSession] = useState<StoredSession | null>(null);
