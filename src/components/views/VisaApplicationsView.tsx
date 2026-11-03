@@ -17,6 +17,7 @@ import { ConfirmDeleteModal } from '../ConfirmDeleteModal';
 
 interface VisaApplicationsViewProps {
   language: 'en' | 'bn';
+  accessToken: string | null;
 }
 
 export const VisaApplicationsView: React.FC<VisaApplicationsViewProps> = ({ language }) => {
