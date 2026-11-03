@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
 import { 
   FileText, 
@@ -12,7 +12,8 @@ import {
   Building,
   Trash2
 } from 'lucide-react';
-import { VisaApplication, storageService } from '../../services/storageService';
+import { VisaApplication } from '../../services/storageService';
+import { adminCrmService } from '../../services/adminCrmService';
 import { ConfirmDeleteModal } from '../ConfirmDeleteModal';
 
 interface VisaApplicationsViewProps {
@@ -20,8 +21,15 @@ interface VisaApplicationsViewProps {
   accessToken: string | null;
 }
 
-export const VisaApplicationsView: React.FC<VisaApplicationsViewProps> = ({ language }) => {
-  const [visas, setVisas] = useState<VisaApplication[]>(() => storageService.getVisas());
+export const VisaApplicationsView: React.FC<VisaApplicationsViewProps> = ({ language, accessToken }) => {
+  const [visas, setVisas] = useState<VisaApplication[]>([]);
+  const [dataError, setDataError] = useState('');
+  useEffect(() => {
+    if (!accessToken) return;
+    let active = true;
+    adminCrmService.visas(accessToken).then(rows => { if (active) { setVisas(rows); setDataError(''); } }).catch(error => { if (active) setDataError(error instanceof Error ? error.message : 'Unable to load visa records.'); });
+    return () => { active = false; };
+  }, [accessToken]);
   const [search, setSearch] = useState('');
   const [visaToDelete, setVisaToDelete] = useState<VisaApplication | null>(null);
   const [selectedCountry, setSelectedCountry] = useState('All');
@@ -35,40 +43,49 @@ export const VisaApplicationsView: React.FC<VisaApplicationsViewProps> = ({ lang
   const [casI20Number, setCasI20Number] = useState('');
   const [deadline, setDeadline] = useState('15 Dec 2026');
 
-  const handleAddVisa = (e: React.FormEvent) => {
+  const handleAddVisa = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!studentName.trim()) return;
 
-    const newVisa: VisaApplication = {
-      id: `v_${Date.now()}`,
+    const newVisa = {
       studentName,
       country,
       visaType,
       intakeSeason,
       applicationStatus: 'Documents Gathering',
       casI20Number: casI20Number || undefined,
-      deadline,
-      lastUpdated: new Date().toLocaleDateString('en-GB')
+      deadline
     };
 
-    const updated = storageService.addVisa(newVisa);
-    setVisas(updated);
+    try {
+      const saved = await adminCrmService.addVisa(accessToken || '', newVisa);
+      setVisas(current => [saved, ...current]);
+      setDataError('');
+    } catch (error) {
+      setDataError(error instanceof Error ? error.message : 'Unable to save visa record.');
+      return;
+    }
     setIsAdding(false);
     setStudentName('');
     setCasI20Number('');
   };
 
-  const handleConfirmDelete = () => {
-    if (visaToDelete) {
-      const updated = storageService.deleteVisa(visaToDelete.id);
-      setVisas(updated);
+  const handleConfirmDelete = async () => {
+    if (!visaToDelete) return;
+    try {
+      await adminCrmService.deleteVisa(accessToken || '', visaToDelete.id);
+      setVisas(current => current.filter(item => item.id !== visaToDelete.id));
       setVisaToDelete(null);
-    }
+      setDataError('');
+    } catch (error) { setDataError(error instanceof Error ? error.message : 'Unable to delete visa record.'); }
   };
 
-  const handleStatusChange = (id: string, status: VisaApplication['applicationStatus']) => {
-    const updated = storageService.updateVisa(id, { applicationStatus: status });
-    setVisas(updated);
+  const handleStatusChange = async (id: string, status: VisaApplication['applicationStatus']) => {
+    try {
+      const saved = await adminCrmService.updateVisa(accessToken || '', id, status);
+      setVisas(current => current.map(item => item.id === id ? saved : item));
+      setDataError('');
+    } catch (error) { setDataError(error instanceof Error ? error.message : 'Unable to update visa status.'); }
   };
 
   const filtered = visas.filter((v) => {
@@ -225,6 +242,8 @@ export const VisaApplicationsView: React.FC<VisaApplicationsViewProps> = ({ lang
           </div>
         </form>
       )}
+
+      {dataError && <p role="alert" className="px-4 py-3 rounded-xl border border-rose-400/30 bg-rose-950/40 text-rose-200 text-xs">{dataError}</p>}
 
       {/* Filter Bar */}
       <div className="p-4 glass-panel rounded-2xl border border-white/10 flex flex-wrap items-center justify-between gap-3 text-xs">
