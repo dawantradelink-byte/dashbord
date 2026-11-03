@@ -34,3 +34,9 @@
 - Updated both view prop interfaces to accept the token. Existing localStorage CRUD remains in place for now; Supabase CRUD is NOT yet implemented or verified.
 - No production database migration applied, no merge, and no deployment.
 - Next: replace localStorage operations in both views with admin-token Supabase REST reads/writes, then run build/type checks and document results.
+
+## 2026-11-04 — Founder deployment authorization
+- User explicitly approved production deployment of the NextBorder Admin Dashboard after implementation and verification are complete.
+- This approval authorizes the deployment step for this project, but does not waive security checks, production database migration review, backup/rollback preparation, or verification of the correct hosting project/domain.
+- Do not deploy unfinished or failing code. Complete Supabase CRUD implementation, type/build checks, development preview tests, and deployment target verification first.
+- No merge or production deployment has occurred as part of recording this authorization. Record actual deployment URL, commit, time, and verification evidence in this log only after a successful deployment.
