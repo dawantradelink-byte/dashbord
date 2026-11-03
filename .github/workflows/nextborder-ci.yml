@@ -1,0 +1,29 @@
+name: NextBorder CI
+
+on:
+  push:
+    branches:
+      - feature/private-google-calendar
+  pull_request:
+    branches:
+      - nora/full-dashboard-replacement
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - name: Install locked dependencies
+        run: bun install --frozen-lockfile
+      - name: TypeScript validation
+        run: bun run lint
+      - name: Production bundle validation
+        run: bun run build
