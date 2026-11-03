@@ -68,3 +68,5 @@
 - Validation still outstanding: no local/CI TypeScript build or runtime CRUD test has been completed. Vercel returned zero deployments for this feature branch, so no preview build is available yet.
 - No Supabase schema, production data, Vercel configuration, production deployment, or secrets were changed. UI LOCK remains active.
 - Next: verify code with a build/test environment, review migration helper semantics and schema compatibility, then apply to a non-production database before any production release.
+
+- Additional CI check: GitHub combined commit status and workflow-run lookup for the latest checkpoint commit returned no status checks and no workflow runs. This is not a passing build; automated build evidence is currently unavailable.
