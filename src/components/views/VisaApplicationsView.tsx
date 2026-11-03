@@ -47,7 +47,7 @@ export const VisaApplicationsView: React.FC<VisaApplicationsViewProps> = ({ lang
     e.preventDefault();
     if (!studentName.trim()) return;
 
-    const newVisa = {
+    const newVisa: Omit<VisaApplication, 'id' | 'lastUpdated'> = {
       studentName,
       country,
       visaType,
