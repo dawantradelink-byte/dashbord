@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
 import { 
   GraduationCap, 
@@ -14,7 +14,8 @@ import {
   Trash2,
   Edit2
 } from 'lucide-react';
-import { StudentClient, storageService } from '../../services/storageService';
+import { StudentClient } from '../../services/storageService';
+import { adminCrmService } from '../../services/adminCrmService';
 import { ConfirmDeleteModal } from '../ConfirmDeleteModal';
 
 interface ClientsViewProps {
@@ -23,7 +24,14 @@ interface ClientsViewProps {
 }
 
 export const ClientsView: React.FC<ClientsViewProps> = ({ language, accessToken }) => {
-  const [clients, setClients] = useState<StudentClient[]>(() => storageService.getClients());
+  const [clients, setClients] = useState<StudentClient[]>([]);
+  const [dataError, setDataError] = useState('');
+  useEffect(() => {
+    if (!accessToken) return;
+    let active = true;
+    adminCrmService.clients(accessToken).then(rows => { if (active) { setClients(rows); setDataError(''); } }).catch(error => { if (active) setDataError(error instanceof Error ? error.message : 'Unable to load student records.'); });
+    return () => { active = false; };
+  }, [accessToken]);
   const [search, setSearch] = useState('');
   const [clientToDelete, setClientToDelete] = useState<StudentClient | null>(null);
   const [selectedStage, setSelectedStage] = useState('All');
@@ -38,12 +46,11 @@ export const ClientsView: React.FC<ClientsViewProps> = ({ language, accessToken 
   const [newCounselor, setNewCounselor] = useState('Ishak Dawan');
   const [newNotes, setNewNotes] = useState('');
 
-  const handleAddClient = (e: React.FormEvent) => {
+  const handleAddClient = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newName.trim()) return;
 
-    const newClient: StudentClient = {
-      id: `c_${Date.now()}`,
+    const newClient = {
       name: newName,
       email: newEmail,
       phone: newPhone,
@@ -52,12 +59,16 @@ export const ClientsView: React.FC<ClientsViewProps> = ({ language, accessToken 
       currentStage: 'Initial Inquiry',
       assignedCounselor: newCounselor,
       notes: newNotes,
-      createdAt: new Date().toLocaleDateString('en-GB'),
-      updatedAt: new Date().toLocaleDateString('en-GB')
     };
 
-    const updated = storageService.addClient(newClient);
-    setClients(updated);
+    try {
+      const saved = await adminCrmService.addClient(accessToken || '', newClient);
+      setClients(current => [saved, ...current]);
+      setDataError('');
+    } catch (error) {
+      setDataError(error instanceof Error ? error.message : 'Unable to save student record.');
+      return;
+    }
     setIsAdding(false);
     setNewName('');
     setNewEmail('');
@@ -65,17 +76,22 @@ export const ClientsView: React.FC<ClientsViewProps> = ({ language, accessToken 
     setNewNotes('');
   };
 
-  const handleConfirmDelete = () => {
-    if (clientToDelete) {
-      const updated = storageService.deleteClient(clientToDelete.id);
-      setClients(updated);
+  const handleConfirmDelete = async () => {
+    if (!clientToDelete) return;
+    try {
+      await adminCrmService.deleteClient(accessToken || '', clientToDelete.id);
+      setClients(current => current.filter(item => item.id !== clientToDelete.id));
       setClientToDelete(null);
-    }
+      setDataError('');
+    } catch (error) { setDataError(error instanceof Error ? error.message : 'Unable to delete student record.'); }
   };
 
-  const handleStageChange = (id: string, stage: StudentClient['currentStage']) => {
-    const updated = storageService.updateClient(id, { currentStage: stage });
-    setClients(updated);
+  const handleStageChange = async (id: string, stage: StudentClient['currentStage']) => {
+    try {
+      const saved = await adminCrmService.updateClient(accessToken || '', id, stage);
+      setClients(current => current.map(item => item.id === id ? saved : item));
+      setDataError('');
+    } catch (error) { setDataError(error instanceof Error ? error.message : 'Unable to update student stage.'); }
   };
 
   const filtered = clients.filter((c) => {
@@ -243,6 +259,8 @@ export const ClientsView: React.FC<ClientsViewProps> = ({ language, accessToken 
           </div>
         </form>
       )}
+
+      {dataError && <p role="alert" className="px-4 py-3 rounded-xl border border-rose-400/30 bg-rose-950/40 text-rose-200 text-xs">{dataError}</p>}
 
       {/* Filter and Search */}
       <div className="p-4 glass-panel rounded-2xl border border-white/10 flex flex-wrap items-center justify-between gap-3 text-xs">
