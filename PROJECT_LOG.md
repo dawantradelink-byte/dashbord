@@ -57,3 +57,14 @@
 - Feature branch is 11 commits ahead and 0 commits behind. The current feature branch contains the CRM migration, audit/log documentation, and access-token prop wiring; the two CRM views still rely on localStorage.
 - Production remains on the base branch commit `e9009e5b8e743909727199f516e7fd4f537311ad`; the latest non-production deployment corresponds to base branch commit `fe3be359b7f80118a368dda7bc5493b788b146e1`.
 - Keep feature work isolated. Do not merge or promote the 11 commits until CRM integration, build/test evidence, and database migration review are complete.
+
+
+## 2026-11-04 — Supabase CRM integration code checkpoint
+- Added `src/services/adminCrmService.ts` with authenticated Supabase REST operations for listing, creating, updating, and deleting student client and visa application records. Uses the public/publishable Supabase key plus the verified admin access token; no service-role key is used.
+- Updated `ClientsView.tsx` to load records from Supabase and persist create, stage update, and delete actions through the service. Removed its direct localStorage CRUD calls. Added an inline error message while preserving the existing visual layout.
+- Updated `VisaApplicationsView.tsx` to load records from Supabase and persist create, status update, and delete actions through the service. Removed its direct localStorage CRUD calls. Added an inline error message while preserving the existing visual layout.
+- Confirmed `App.tsx` passes the current admin access token to both views.
+- Read-only Supabase inspection confirms the target tables are not yet present in the connected project. Existing public policies predominantly use the role-checking pattern `has_role(auth.uid(), 'admin'::app_role)`; the public and private helper functions have different security-definer settings. The prepared migration has not been applied.
+- Validation still outstanding: no local/CI TypeScript build or runtime CRUD test has been completed. Vercel returned zero deployments for this feature branch, so no preview build is available yet.
+- No Supabase schema, production data, Vercel configuration, production deployment, or secrets were changed. UI LOCK remains active.
+- Next: verify code with a build/test environment, review migration helper semantics and schema compatibility, then apply to a non-production database before any production release.
