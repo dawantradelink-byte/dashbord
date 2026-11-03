@@ -40,3 +40,14 @@
 - This approval authorizes the deployment step for this project, but does not waive security checks, production database migration review, backup/rollback preparation, or verification of the correct hosting project/domain.
 - Do not deploy unfinished or failing code. Complete Supabase CRUD implementation, type/build checks, development preview tests, and deployment target verification first.
 - No merge or production deployment has occurred as part of recording this authorization. Record actual deployment URL, commit, time, and verification evidence in this log only after a successful deployment.
+
+
+## 2026-11-04 — Production target re-verification
+- Rechecked the connected Vercel account and its complete visible project inventory.
+- The account currently exposes one project: `nextborder-visa` (Vite), project ID `prj_xFGj8srhuCoff1Yt2v4BWPjfXTXp`, under team `next-border-love-final`.
+- Read-only project-domain lookup confirms `admin.nextborder.online` is attached to this project and marked verified. The project domain list also includes `nextborder.online` and `www.nextborder.online`.
+- Latest deployment inventory shows the current latest deployment is READY but is a non-production deployment from `nora/full-dashboard-replacement` at commit `fe3be359b7f80118a368dda7bc5493b788b146e1`. A prior deployment at `e9009e5b8e743909727199f516e7fd4f537311ad` is marked production and READY.
+- This confirms the Vercel project/domain association, but does NOT establish that the current feature branch has been built, tested, or deployed to production. Do not promote or deploy until CRM CRUD, preview verification, migration safety, and rollback checks pass.
+- GitHub confirms `feature/private-google-calendar` exists.
+- CRM integration remains incomplete: Clients and Visa Applications still use localStorage. An attempted creation of a shared Supabase REST service did not complete; no claim of implementation or deployment is made.
+- No Vercel settings, deployment targets, Supabase schema, secrets, or production data were changed during this read-only verification.
