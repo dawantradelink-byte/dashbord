@@ -19,9 +19,10 @@ import { ConfirmDeleteModal } from '../ConfirmDeleteModal';
 
 interface ClientsViewProps {
   language: 'en' | 'bn';
+  accessToken: string | null;
 }
 
-export const ClientsView: React.FC<ClientsViewProps> = ({ language }) => {
+export const ClientsView: React.FC<ClientsViewProps> = ({ language, accessToken }) => {
   const [clients, setClients] = useState<StudentClient[]>(() => storageService.getClients());
   const [search, setSearch] = useState('');
   const [clientToDelete, setClientToDelete] = useState<StudentClient | null>(null);
