@@ -50,7 +50,7 @@ export const ClientsView: React.FC<ClientsViewProps> = ({ language, accessToken 
     e.preventDefault();
     if (!newName.trim()) return;
 
-    const newClient = {
+    const newClient: Omit<StudentClient, 'id' | 'createdAt' | 'updatedAt'> = {
       name: newName,
       email: newEmail,
       phone: newPhone,
