@@ -28,3 +28,9 @@
 - Adds lookup/order indexes.
 - Migration is committed to the feature branch only. It has NOT been applied to Supabase or production.
 - Existing UI remains unchanged. Next implementation step: connect Clients and Visa Applications views to these tables and verify types/build in a preview environment.
+
+## 2026-11-04 — CRM integration implementation in progress
+- Passed the authenticated admin access token from `App.tsx` into the Clients and Visa Applications views.
+- Updated both view prop interfaces to accept the token. Existing localStorage CRUD remains in place for now; Supabase CRUD is NOT yet implemented or verified.
+- No production database migration applied, no merge, and no deployment.
+- Next: replace localStorage operations in both views with admin-token Supabase REST reads/writes, then run build/type checks and document results.
