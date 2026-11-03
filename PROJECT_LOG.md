@@ -79,3 +79,11 @@
 - Supabase project inventory shows only one active NextBorder project; the other connected Supabase project is inactive. No active staging database is available. The target tables `student_clients` and `visa_applications` are still absent from the active database; migration remains unapplied.
 - Preview build is not equivalent to a runtime/browser test. TypeScript `tsc --noEmit`, authenticated CRUD tests, browser smoke tests, and a staging migration test remain outstanding. Direct preview URL inspection was unavailable in this session.
 - No production deployment, production database migration, branch merge, domain alias change, or secret inspection occurred. Keep production release blocked until a safe staging DB path and runtime CRUD verification are available.
+
+
+## 2026-11-04 — CI validation and security-path review
+- Added `.github/workflows/nextborder-ci.yml` on the feature branch. Pushes to the feature branch and pull requests targeting `nora/full-dashboard-replacement` now run locked Bun dependency installation, `bun run lint` (TypeScript `tsc --noEmit`), and `bun run build`.
+- Reviewed the admin sign-in gate: it authenticates through Supabase Auth and separately verifies the user's `admin` role before rendering the dashboard. The legacy `adminPasscode` field in local settings is not used by this sign-in gate; it is a settings UI field, not an authentication control. Do not treat it as security.
+- Confirmed that operational summary counts still read clients and visa records from browser localStorage, while their dedicated views now use Supabase. This creates a dashboard consistency gap until the summary is migrated to the same database source.
+- Confirmed that leads, blogs, staff, portal settings and telemetry still use browser localStorage in the inspected storage service. They are not yet cross-device database-backed. Avoid describing the entire admin portal as production-persistent.
+- No UI changes, production deployment, merge, Supabase schema changes, or secrets inspection occurred. CI result is pending after this commit.
