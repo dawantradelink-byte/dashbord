@@ -19,3 +19,12 @@
 - Reconfirmed code risks: lead status/edit/delete and other CRM modules currently rely on browser localStorage; these changes are not shared/persisted across devices. Supabase enquiry read works, but write permissions were not established in the audited policies.
 - Google Calendar website OAuth is not implemented. ChatGPT's connected calendar is separate and cannot silently authorize the website.
 - Safety: no source code, database schema, RLS policy, Vercel setting, or production deployment was changed in this checkpoint. UI LOCK remains active. Continue on the feature branch only until the correct admin hosting project and secure backend path are verified.
+
+
+## 2026-11-04 — CRM database migration prepared
+- Added `supabase/migrations/20261104010000_admin_crm_tables.sql` on `feature/private-google-calendar`.
+- Defines `student_clients` and `visa_applications` tables matching the current dashboard field model.
+- Enables RLS; grants authenticated CRUD only where the existing `public.has_role(auth.uid(), 'admin')` check passes.
+- Adds lookup/order indexes.
+- Migration is committed to the feature branch only. It has NOT been applied to Supabase or production.
+- Existing UI remains unchanged. Next implementation step: connect Clients and Visa Applications views to these tables and verify types/build in a preview environment.
