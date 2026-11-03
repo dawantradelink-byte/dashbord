@@ -51,3 +51,9 @@
 - GitHub confirms `feature/private-google-calendar` exists.
 - CRM integration remains incomplete: Clients and Visa Applications still use localStorage. An attempted creation of a shared Supabase REST service did not complete; no claim of implementation or deployment is made.
 - No Vercel settings, deployment targets, Supabase schema, secrets, or production data were changed during this read-only verification.
+
+## 2026-11-04 — Branch and deployment comparison
+- Compared `feature/private-google-calendar` against the Vercel-linked base branch `nora/full-dashboard-replacement`.
+- Feature branch is 11 commits ahead and 0 commits behind. The current feature branch contains the CRM migration, audit/log documentation, and access-token prop wiring; the two CRM views still rely on localStorage.
+- Production remains on the base branch commit `e9009e5b8e743909727199f516e7fd4f537311ad`; the latest non-production deployment corresponds to base branch commit `fe3be359b7f80118a368dda7bc5493b788b146e1`.
+- Keep feature work isolated. Do not merge or promote the 11 commits until CRM integration, build/test evidence, and database migration review are complete.
