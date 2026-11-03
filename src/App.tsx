@@ -289,10 +289,10 @@ function DashboardApp() {
         );
 
       case 'Students / Clients':
-        return <ClientsView key="clients" language={language} />;
+        return <ClientsView key="clients" language={language} accessToken={accessToken} />;
 
       case 'Visa Applications':
-        return <VisaApplicationsView key="visas" language={language} />;
+        return <VisaApplicationsView key="visas" language={language} accessToken={accessToken} />;
 
       case 'Website Analytics':
         return <WebsiteAnalyticsView key="analytics" language={language} />;
