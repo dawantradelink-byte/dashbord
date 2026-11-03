@@ -70,3 +70,12 @@
 - Next: verify code with a build/test environment, review migration helper semantics and schema compatibility, then apply to a non-production database before any production release.
 
 - Additional CI check: GitHub combined commit status and workflow-run lookup for the latest checkpoint commit returned no status checks and no workflow runs. This is not a passing build; automated build evidence is currently unavailable.
+
+
+## 2026-11-04 — Feature preview build and database authorization review
+- Created a Vercel Preview deployment from `feature/private-google-calendar` at commit `ff7dea5e43b25a1d16abb2e2f70c2259d493e46d`; deployment ID `dpl_2i9tivk3jVWuAgS9c7oSPrUSd2M8`, URL `https://nextborder-visa-git-feature-priva-7fcb9f-next-border-love-final.vercel.app`, status `READY`, target is preview (not production).
+- Vercel build log confirms Bun install completed and `bun run build` / `vite build` ran successfully. Vite emitted a non-blocking warning that `vite.config.ts` uses `__dirname` with native config loading; no build failure was reported.
+- Read-only Supabase review confirmed `public.has_role(uuid, app_role)` is SECURITY INVOKER and delegates to `private.has_role`, which is SECURITY DEFINER with fixed search_path and verifies `auth.uid() = _user_id` before checking `public.user_roles`. Both functions are executable by authenticated and not executable by anon.
+- Supabase project inventory shows only one active NextBorder project; the other connected Supabase project is inactive. No active staging database is available. The target tables `student_clients` and `visa_applications` are still absent from the active database; migration remains unapplied.
+- Preview build is not equivalent to a runtime/browser test. TypeScript `tsc --noEmit`, authenticated CRUD tests, browser smoke tests, and a staging migration test remain outstanding. Direct preview URL inspection was unavailable in this session.
+- No production deployment, production database migration, branch merge, domain alias change, or secret inspection occurred. Keep production release blocked until a safe staging DB path and runtime CRUD verification are available.
