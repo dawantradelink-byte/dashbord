@@ -22,7 +22,7 @@
 ## 2026-11-04 — CRM database migration prepared
 - Added `supabase/migrations/20261104010000_admin_crm_tables.sql` on `feature/private-google-calendar`.
 - Defines `student_clients` and `visa_applications` tables matching the current dashboard field model.
-- Enables RLS; grants authenticated CRUD only where the existing `public.has_role(auth.uid(), 'admin')` check passes.
+- Enables RLS; grants authenticated CRUD only where the existing `public.has_role(auth.uid(), 'admin'::app_role)` check passes.
 - Adds lookup/order indexes.
 - Migration is committed to the feature branch only. It has NOT been applied to Supabase or production.
 - Existing UI remains unchanged. Next implementation step: connect Clients and Visa Applications views to these tables and verify types/build in a preview environment.
@@ -84,7 +84,7 @@
 
 ## 2026-11-04 — Latest feature preview smoke check
 - GitHub Actions run `41742187748` completed successfully on commit `831636fc605e50437dfa198920648b0f381beb65`: locked Bun dependency install, TypeScript validation, and Vite production bundle validation all passed.
-- Created a fresh Vercel Preview deployment from the exact same feature-branch commit: deployment `dpl_DVD6vrK8L6zg2vKqQbLQvPDNNvbU`, URL `https://nextborder-visa-2711iz3j9-next-border-love-final.vercel.app`, state READY, target preview (not production).
+- Created a Vercel Preview deployment from the exact same feature-branch commit: deployment `dpl_DVD6vrK8L6zg2vKqQbLQvPDNNvbU`, URL `https://nextborder-visa-2711iz3j9-next-border-love-final.vercel.app`, state READY, target preview (not production).
 - HTTP smoke checks returned 200 for the preview root HTML and its referenced JavaScript bundle. This verifies static delivery only; it does not prove authenticated browser behavior or Supabase CRUD.
 - Build warning observed: main JavaScript bundle is approximately 709 kB minified (193 kB gzip), above Vite's 500 kB advisory threshold. Existing Vite config also warns about `__dirname` under native config loading. Neither warning failed the build; evaluate safe code-splitting/config cleanup without changing UI.
 - Source re-review confirms dashboard lead status/edit/delete/evaluation actions still write browser localStorage while public enquiries are loaded from Supabase. The dashboard's top KPI cards also have not yet been proven to use live CRM data. This is a material production-readiness gap.
@@ -99,3 +99,12 @@
 - A follow-up browser interaction timed out during responsive viewport inspection; mobile layout is unverified.
 - Read-only Vercel runtime-error summary for the project showed six historical `security-rate-limit` errors on `/__server` with message `Cannot read properties of undefined (reading 'rest')`; the most recent timestamp was 2026-11-04 00:49:46 UTC. These errors predate the current preview session and need separate attribution before changing the security limiter.
 - The source branch's current `PROJECT_LOG.md` records prior checkpoints; no source-code, Supabase schema, Vercel settings, or production deployment was changed during this QA pass.
+
+## 2026-11-04 — Admin route fallback fix (Preview only)
+- Added `vercel.json` on `feature/private-google-calendar` with rewrites for the supported admin entry paths `/dashboard` and `/admin` to the Vite `index.html`. No public content paths are rewritten.
+- Created Vercel Preview deployment `dpl_74Q7oSDJHiBzJtPAoTLBHbgiDShR` from commit `d4151fdad3076f599fb77ec42d634a416e237fd2`; build completed and state is READY. Preview URL: `https://nextborder-visa-520m9c18j-next-border-love-final.vercel.app`.
+- Firecrawl read-only check confirmed `/dashboard` and `/admin` now return the React Admin Console login screen rather than Vercel 404. No credentials were entered, and no user data was changed.
+- The rewrite does not create separate route-specific pages; the app still initializes its Dashboard tab at the root after successful admin authentication.
+- This is a Preview-only verification. Production was not changed or promoted.
+- CRM CRUD remains blocked for real data until the prepared Supabase migration creates `student_clients` and `visa_applications` in a safe database environment. There is no active staging Supabase project, and the migration has not been applied to the live project.
+- The Vercel build still reports the existing 709 kB JavaScript chunk advisory and the `__dirname` config warning. Build itself succeeded.
