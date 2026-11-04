@@ -87,3 +87,13 @@
 - Confirmed that operational summary counts still read clients and visa records from browser localStorage, while their dedicated views now use Supabase. This creates a dashboard consistency gap until the summary is migrated to the same database source.
 - Confirmed that leads, blogs, staff, portal settings and telemetry still use browser localStorage in the inspected storage service. They are not yet cross-device database-backed. Avoid describing the entire admin portal as production-persistent.
 - No UI changes, production deployment, merge, Supabase schema changes, or secrets inspection occurred. CI result is pending after this commit.
+
+
+## 2026-11-04 — Latest feature preview smoke check
+- GitHub Actions run `41742187748` completed successfully on commit `831636fc605e50437dfa198920648b0f381beb65`: locked Bun dependency install, TypeScript validation, and Vite production bundle validation all passed.
+- Created a fresh Vercel Preview deployment from the exact same feature-branch commit: deployment `dpl_DVD6vrK8L6zg2vKqQbLQvPDNNvbU`, URL `https://nextborder-visa-2711iz3j9-next-border-love-final.vercel.app`, state READY, target preview (not production).
+- HTTP smoke checks returned 200 for the preview root HTML and its referenced JavaScript bundle. This verifies static delivery only; it does not prove authenticated browser behavior or Supabase CRUD.
+- Build warning observed: main JavaScript bundle is approximately 709 kB minified (193 kB gzip), above Vite's 500 kB advisory threshold. Existing Vite config also warns about `__dirname` under native config loading. Neither warning failed the build; evaluate safe code-splitting/config cleanup without changing UI.
+- Source re-review confirms dashboard lead status/edit/delete/evaluation actions still write browser localStorage while public enquiries are loaded from Supabase. The dashboard's top KPI cards also have not yet been proven to use live CRM data. This is a material production-readiness gap.
+- Dedicated Clients and Visa Applications views call the new Supabase CRUD service, but their target tables remain absent from the active Supabase project because the migration is unapplied. No authenticated CRUD test can pass until a safe database migration environment is available.
+- No production deployment, merge, production alias change, Supabase migration, or secrets inspection occurred. Production release remains blocked pending runtime auth/CRUD verification, migration safety, and consistency across CRM data views.
