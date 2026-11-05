@@ -1,5 +1,6 @@
 -- NextBorder Admin CRM tables
--- Prepared on feature branch only. Review and apply to a non-production database first.
+-- Applied to the confirmed active NextBorder Supabase project as migration 20261105030519.
+-- Additive schema only; retain these tables if the application release is rolled back.
 -- Admin-only access is enforced with the existing public.has_role(uuid, app_role) helper.
 
 create table if not exists public.student_clients (
