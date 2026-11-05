@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { 
   GraduationCap, 
@@ -19,10 +19,40 @@ import { ConfirmDeleteModal } from '../ConfirmDeleteModal';
 
 interface ClientsViewProps {
   language: 'en' | 'bn';
+  accessToken: string;
 }
 
-export const ClientsView: React.FC<ClientsViewProps> = ({ language }) => {
-  const [clients, setClients] = useState<StudentClient[]>(() => storageService.getClients());
+export const ClientsView: React.FC<ClientsViewProps> = ({ language, accessToken }) => {
+  const [clients, setClients] = useState<StudentClient[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [dbError, setDbError] = useState('');
+  const supabaseUrl = (import.meta.env.VITE_SUPABASE_URL || '').replace(/\/$/, '');
+  const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+  const dbHeaders = { apikey: supabaseKey, Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' };
+  const mapClient = (row: any): StudentClient => ({
+    id: String(row.id), name: row.name || '', email: row.email || '', phone: row.phone || '',
+    targetCountry: row.target_country || '', targetUniversity: row.target_university || '',
+    currentStage: row.current_stage, assignedCounselor: row.assigned_counselor || '',
+    notes: row.notes || '', createdAt: row.created_at, updatedAt: row.updated_at
+  });
+
+  useEffect(() => {
+    let active = true;
+    const loadClients = async () => {
+      setIsLoading(true); setDbError('');
+      try {
+        if (!supabaseUrl || !supabaseKey || !accessToken) throw new Error('Supabase configuration or admin session is missing.');
+        const response = await fetch(`${supabaseUrl}/rest/v1/student_clients?select=*&order=created_at.desc`, { headers: dbHeaders });
+        if (!response.ok) throw new Error(`Could not load student clients (${response.status}).`);
+        const rows = await response.json();
+        if (active) setClients(rows.map(mapClient));
+      } catch (error) {
+        if (active) setDbError(error instanceof Error ? error.message : 'Could not load student clients.');
+      } finally { if (active) setIsLoading(false); }
+    };
+    loadClients();
+    return () => { active = false; };
+  }, [accessToken]);
   const [search, setSearch] = useState('');
   const [clientToDelete, setClientToDelete] = useState<StudentClient | null>(null);
   const [selectedStage, setSelectedStage] = useState('All');
@@ -37,44 +67,50 @@ export const ClientsView: React.FC<ClientsViewProps> = ({ language }) => {
   const [newCounselor, setNewCounselor] = useState('Ishak Dawan');
   const [newNotes, setNewNotes] = useState('');
 
-  const handleAddClient = (e: React.FormEvent) => {
+  const handleAddClient = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newName.trim()) return;
-
-    const newClient: StudentClient = {
-      id: `c_${Date.now()}`,
-      name: newName,
-      email: newEmail,
-      phone: newPhone,
-      targetCountry: newCountry,
-      targetUniversity: newUniversity,
-      currentStage: 'Initial Inquiry',
-      assignedCounselor: newCounselor,
-      notes: newNotes,
-      createdAt: new Date().toLocaleDateString('en-GB'),
-      updatedAt: new Date().toLocaleDateString('en-GB')
-    };
-
-    const updated = storageService.addClient(newClient);
-    setClients(updated);
-    setIsAdding(false);
-    setNewName('');
-    setNewEmail('');
-    setNewUniversity('');
-    setNewNotes('');
+    setDbError('');
+    try {
+      const response = await fetch(`${supabaseUrl}/rest/v1/student_clients`, {
+        method: 'POST', headers: { ...dbHeaders, Prefer: 'return=representation' },
+        body: JSON.stringify({
+          name: newName.trim(), email: newEmail.trim(), phone: newPhone.trim(),
+          target_country: newCountry, target_university: newUniversity.trim() || null,
+          current_stage: 'Initial Inquiry', assigned_counselor: newCounselor.trim(), notes: newNotes.trim()
+        })
+      });
+      if (!response.ok) throw new Error(`Could not save student client (${response.status}).`);
+      const rows = await response.json();
+      if (!rows?.[0]) throw new Error('The database did not return the saved student record.');
+      setClients(current => [mapClient(rows[0]), ...current]);
+      setIsAdding(false); setNewName(''); setNewEmail(''); setNewUniversity(''); setNewNotes('');
+    } catch (error) { setDbError(error instanceof Error ? error.message : 'Could not save student client.'); }
   };
 
-  const handleConfirmDelete = () => {
-    if (clientToDelete) {
-      const updated = storageService.deleteClient(clientToDelete.id);
-      setClients(updated);
+  const handleConfirmDelete = async () => {
+    if (!clientToDelete) return;
+    setDbError('');
+    try {
+      const response = await fetch(`${supabaseUrl}/rest/v1/student_clients?id=eq.${encodeURIComponent(clientToDelete.id)}`, {
+        method: 'DELETE', headers: { ...dbHeaders, Prefer: 'return=minimal' }
+      });
+      if (!response.ok) throw new Error(`Could not delete student client (${response.status}).`);
+      setClients(current => current.filter(client => client.id !== clientToDelete.id));
       setClientToDelete(null);
-    }
+    } catch (error) { setDbError(error instanceof Error ? error.message : 'Could not delete student client.'); }
   };
 
-  const handleStageChange = (id: string, stage: StudentClient['currentStage']) => {
-    const updated = storageService.updateClient(id, { currentStage: stage });
-    setClients(updated);
+  const handleStageChange = async (id: string, stage: StudentClient['currentStage']) => {
+    setDbError('');
+    try {
+      const response = await fetch(`${supabaseUrl}/rest/v1/student_clients?id=eq.${encodeURIComponent(id)}`, {
+        method: 'PATCH', headers: { ...dbHeaders, Prefer: 'return=minimal' },
+        body: JSON.stringify({ current_stage: stage, updated_at: new Date().toISOString() })
+      });
+      if (!response.ok) throw new Error(`Could not update student stage (${response.status}).`);
+      setClients(current => current.map(client => client.id === id ? { ...client, currentStage: stage, updatedAt: new Date().toISOString() } : client));
+    } catch (error) { setDbError(error instanceof Error ? error.message : 'Could not update student stage.'); }
   };
 
   const filtered = clients.filter((c) => {
@@ -112,6 +148,8 @@ export const ClientsView: React.FC<ClientsViewProps> = ({ language }) => {
       transition={{ duration: 0.25 }}
       className="space-y-6"
     >
+      {dbError && <div role="alert" className="p-3 rounded-xl border border-rose-500/40 bg-rose-950/50 text-rose-200 text-xs">{dbError}</div>}
+      {isLoading && <div className="p-3 text-rose-200/70 text-xs">{language === 'en' ? 'Loading student records…' : 'শিক্ষার্থীর তথ্য লোড হচ্ছে…'}</div>}
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 glass-panel rounded-3xl border border-white/10 shadow-xl">
         <div>
