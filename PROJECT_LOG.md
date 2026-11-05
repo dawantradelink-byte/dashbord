@@ -59,3 +59,12 @@
 - Confirmed table columns, data types, allowed visa countries/types/statuses, and student stage constraints using read-only Supabase table metadata. No schema, RLS policy, secrets, or existing rows were changed.
 - Related commits: `88d91ca`, `caebdfa`, `829444b`, `a3268b1`, `db28e77`.
 - Verification still pending: TypeScript lint, production build, preview deployment, and browser CRUD tests. These changes are not deployed to production.
+
+## 2026-11-06 | Students and Visa preview build verification
+- Created an isolated Vercel preview deployment for commit `9137842ee4bbecf94c563620553ba3a75249aeca`.
+- Vercel deployment: `dpl_2sjjm7WfHGkdZjK6N6hDBJytcBs1`; state `READY`.
+- Production Vite build completed successfully (`✓ built in 685ms`); deployment output completed.
+- Preview homepage fetch returned HTTP 200.
+- Existing Vite configuration and large-chunk warnings remain; they did not fail the build.
+- `npm run lint` / `tsc --noEmit` has not been executed, and authenticated browser CRUD workflows have not yet been exercised. Do not mark full verification complete or promote this preview to production until those checks pass.
+- Preview URL: `https://nextborder-visa-5345rtx83-next-border-love-final.vercel.app/`.
