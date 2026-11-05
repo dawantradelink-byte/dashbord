@@ -1,5 +1,4 @@
 import React from 'react';
-import companyLogo from '../assets/company-logo.png';
 
 interface NextBorderLogoProps {
   className?: string;
@@ -15,8 +14,8 @@ export const NextBorderLogo: React.FC<NextBorderLogoProps> = ({
   return (
     <div className={`inline-flex items-center gap-3 select-none ${className}`}>
       <img
-        src={companyLogo}
-        alt="Next Border"
+        src="https://www.nextborder.online/nextborder-logo.svg"
+        alt="Next Border official logo"
         width={size}
         height={size}
         className="shrink-0 object-contain"
