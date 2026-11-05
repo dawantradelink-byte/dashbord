@@ -14,7 +14,7 @@ import {
   Trash2,
   Edit2
 } from 'lucide-react';
-import { StudentClient, storageService } from '../../services/storageService';
+import { StudentClient } from '../../services/storageService';
 import { ConfirmDeleteModal } from '../ConfirmDeleteModal';
 
 interface ClientsViewProps {
