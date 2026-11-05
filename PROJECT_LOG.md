@@ -48,3 +48,14 @@
 - `package.json` scripts: `npm run build` runs `vite build`; `npm run lint` runs `tsc --noEmit`. No test script is defined.
 - Next implementation priority: safely connect Clients and Visa Applications to their existing admin-protected tables, then connect Website Analytics to read-only `site_visits`. Keep Leads read-only against Supabase until a properly authorized write path exists. Add visible save/error/loading states and avoid silently falling back to local-only persistence.
 - Verification gate remains unchanged: no claim of completion until build, lint, preview deployment, and browser workflow checks pass. No merge or production deployment without explicit user authorization.
+
+## 2026-11-06 | Students and Visa database integration
+- Target: `nora/dashboard-working-fix` only; production branch unchanged.
+- Connected Students / Clients to the existing `student_clients` table using the verified admin access token and the existing admin-only RLS policy.
+- Implemented database-backed list, create, stage update, and delete operations. Database-generated UUIDs and timestamps are used; failures are shown in the view instead of silently falling back to browser storage.
+- Connected Visa Applications to the existing `visa_applications` table using the verified admin access token and existing admin-only RLS policy.
+- Implemented database-backed list, create, status update, and delete operations with visible loading and error states.
+- Passed the verified admin access token from `App.tsx` into both views. Removed obsolete localStorage imports from those views.
+- Confirmed table columns, data types, allowed visa countries/types/statuses, and student stage constraints using read-only Supabase table metadata. No schema, RLS policy, secrets, or existing rows were changed.
+- Related commits: `88d91ca`, `caebdfa`, `829444b`, `a3268b1`, `db28e77`.
+- Verification still pending: TypeScript lint, production build, preview deployment, and browser CRUD tests. These changes are not deployed to production.
