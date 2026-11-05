@@ -12,7 +12,7 @@ import {
   Building,
   Trash2
 } from 'lucide-react';
-import { VisaApplication, storageService } from '../../services/storageService';
+import { VisaApplication } from '../../services/storageService';
 import { ConfirmDeleteModal } from '../ConfirmDeleteModal';
 
 interface VisaApplicationsViewProps {
