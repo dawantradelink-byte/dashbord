@@ -37,7 +37,18 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ language, onShowToas
   };
 
   const handleConfirmReset = () => {
-    localStorage.clear();
+    // Clear only this dashboard's namespaced records. Never wipe unrelated
+    // application data or authentication/session storage on the same origin.
+    const dashboardStorageKeys = [
+      'nb_leads_data_v3',
+      'nb_blogs_data_v3',
+      'nb_clients_data_v3',
+      'nb_visas_data_v3',
+      'nb_staff_data_v3',
+      'nb_analytics_data_v3',
+      'nb_settings_data_v3'
+    ];
+    dashboardStorageKeys.forEach((key) => localStorage.removeItem(key));
     setIsResetConfirmOpen(false);
     window.location.reload();
   };
