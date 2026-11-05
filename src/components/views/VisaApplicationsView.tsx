@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { 
   FileText, 
@@ -17,10 +17,40 @@ import { ConfirmDeleteModal } from '../ConfirmDeleteModal';
 
 interface VisaApplicationsViewProps {
   language: 'en' | 'bn';
+  accessToken: string;
 }
 
-export const VisaApplicationsView: React.FC<VisaApplicationsViewProps> = ({ language }) => {
-  const [visas, setVisas] = useState<VisaApplication[]>(() => storageService.getVisas());
+export const VisaApplicationsView: React.FC<VisaApplicationsViewProps> = ({ language, accessToken }) => {
+  const [visas, setVisas] = useState<VisaApplication[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [dbError, setDbError] = useState('');
+  const supabaseUrl = (import.meta.env.VITE_SUPABASE_URL || '').replace(/\/$/, '');
+  const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+  const dbHeaders = { apikey: supabaseKey, Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' };
+  const mapVisa = (row: any): VisaApplication => ({
+    id: String(row.id), studentName: row.student_name || '', country: row.country,
+    visaType: row.visa_type, intakeSeason: row.intake_season || '',
+    applicationStatus: row.application_status, casI20Number: row.cas_i20_number || undefined,
+    deadline: row.deadline || '', lastUpdated: row.last_updated || row.created_at
+  });
+
+  useEffect(() => {
+    let active = true;
+    const loadVisas = async () => {
+      setIsLoading(true); setDbError('');
+      try {
+        if (!supabaseUrl || !supabaseKey || !accessToken) throw new Error('Supabase configuration or admin session is missing.');
+        const response = await fetch(`${supabaseUrl}/rest/v1/visa_applications?select=*&order=created_at.desc`, { headers: dbHeaders });
+        if (!response.ok) throw new Error(`Could not load visa applications (${response.status}).`);
+        const rows = await response.json();
+        if (active) setVisas(rows.map(mapVisa));
+      } catch (error) {
+        if (active) setDbError(error instanceof Error ? error.message : 'Could not load visa applications.');
+      } finally { if (active) setIsLoading(false); }
+    };
+    loadVisas();
+    return () => { active = false; };
+  }, [accessToken]);
   const [search, setSearch] = useState('');
   const [visaToDelete, setVisaToDelete] = useState<VisaApplication | null>(null);
   const [selectedCountry, setSelectedCountry] = useState('All');
@@ -34,40 +64,50 @@ export const VisaApplicationsView: React.FC<VisaApplicationsViewProps> = ({ lang
   const [casI20Number, setCasI20Number] = useState('');
   const [deadline, setDeadline] = useState('15 Dec 2026');
 
-  const handleAddVisa = (e: React.FormEvent) => {
+  const handleAddVisa = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!studentName.trim()) return;
-
-    const newVisa: VisaApplication = {
-      id: `v_${Date.now()}`,
-      studentName,
-      country,
-      visaType,
-      intakeSeason,
-      applicationStatus: 'Documents Gathering',
-      casI20Number: casI20Number || undefined,
-      deadline,
-      lastUpdated: new Date().toLocaleDateString('en-GB')
-    };
-
-    const updated = storageService.addVisa(newVisa);
-    setVisas(updated);
-    setIsAdding(false);
-    setStudentName('');
-    setCasI20Number('');
+    setDbError('');
+    try {
+      const response = await fetch(`${supabaseUrl}/rest/v1/visa_applications`, {
+        method: 'POST', headers: { ...dbHeaders, Prefer: 'return=representation' },
+        body: JSON.stringify({
+          student_name: studentName.trim(), country, visa_type: visaType, intake_season: intakeSeason.trim(),
+          application_status: 'Documents Gathering', cas_i20_number: casI20Number.trim() || null,
+          deadline: deadline.trim(), last_updated: new Date().toISOString()
+        })
+      });
+      if (!response.ok) throw new Error(`Could not save visa application (${response.status}).`);
+      const rows = await response.json();
+      if (!rows?.[0]) throw new Error('The database did not return the saved visa record.');
+      setVisas(current => [mapVisa(rows[0]), ...current]);
+      setIsAdding(false); setStudentName(''); setCasI20Number('');
+    } catch (error) { setDbError(error instanceof Error ? error.message : 'Could not save visa application.'); }
   };
 
-  const handleConfirmDelete = () => {
-    if (visaToDelete) {
-      const updated = storageService.deleteVisa(visaToDelete.id);
-      setVisas(updated);
+  const handleConfirmDelete = async () => {
+    if (!visaToDelete) return;
+    setDbError('');
+    try {
+      const response = await fetch(`${supabaseUrl}/rest/v1/visa_applications?id=eq.${encodeURIComponent(visaToDelete.id)}`, {
+        method: 'DELETE', headers: { ...dbHeaders, Prefer: 'return=minimal' }
+      });
+      if (!response.ok) throw new Error(`Could not delete visa application (${response.status}).`);
+      setVisas(current => current.filter(visa => visa.id !== visaToDelete.id));
       setVisaToDelete(null);
-    }
+    } catch (error) { setDbError(error instanceof Error ? error.message : 'Could not delete visa application.'); }
   };
 
-  const handleStatusChange = (id: string, status: VisaApplication['applicationStatus']) => {
-    const updated = storageService.updateVisa(id, { applicationStatus: status });
-    setVisas(updated);
+  const handleStatusChange = async (id: string, status: VisaApplication['applicationStatus']) => {
+    setDbError('');
+    try {
+      const response = await fetch(`${supabaseUrl}/rest/v1/visa_applications?id=eq.${encodeURIComponent(id)}`, {
+        method: 'PATCH', headers: { ...dbHeaders, Prefer: 'return=minimal' },
+        body: JSON.stringify({ application_status: status, last_updated: new Date().toISOString() })
+      });
+      if (!response.ok) throw new Error(`Could not update visa status (${response.status}).`);
+      setVisas(current => current.map(visa => visa.id === id ? { ...visa, applicationStatus: status, lastUpdated: new Date().toISOString() } : visa));
+    } catch (error) { setDbError(error instanceof Error ? error.message : 'Could not update visa status.'); }
   };
 
   const filtered = visas.filter((v) => {
@@ -105,6 +145,8 @@ export const VisaApplicationsView: React.FC<VisaApplicationsViewProps> = ({ lang
       transition={{ duration: 0.25 }}
       className="space-y-6"
     >
+      {dbError && <div role="alert" className="p-3 rounded-xl border border-rose-500/40 bg-rose-950/50 text-rose-200 text-xs">{dbError}</div>}
+      {isLoading && <div className="p-3 text-rose-200/70 text-xs">{language === 'en' ? 'Loading visa records…' : 'ভিসার তথ্য লোড হচ্ছে…'}</div>}
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 glass-panel rounded-3xl border border-white/10 shadow-xl">
         <div>
