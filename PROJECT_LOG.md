@@ -68,3 +68,13 @@
 - Existing Vite configuration and large-chunk warnings remain; they did not fail the build.
 - `npm run lint` / `tsc --noEmit` has not been executed, and authenticated browser CRUD workflows have not yet been exercised. Do not mark full verification complete or promote this preview to production until those checks pass.
 - Preview URL: `https://nextborder-visa-5345rtx83-next-border-love-final.vercel.app/`.
+
+## 2026-11-06 | Production deployment: Students and Visa database integration
+- User confirmed they tested the preview and explicitly requested production deployment.
+- Created production-target deployment from the exact preview-tested source commit `9137842ee4bbecf94c563620553ba3a75249aeca` on `nora/dashboard-working-fix`.
+- Production Vercel deployment: `dpl_cX48sJJzjHZFF8nmGEpphpUfi8sF`; state `READY`.
+- Production build succeeded: `✓ built in 955ms`; deployment completed.
+- Promoted the READY deployment and confirmed all production aliases mapped successfully, including `admin.nextborder.online`, `nextborder.online`, and `www.nextborder.online`.
+- Verified `https://admin.nextborder.online/` returns HTTP 200 and serves the deployed app bundle `index-DHdaXQje.js` / `index-BWfdQoaO.css` from the new deployment.
+- No Supabase schema, RLS, secrets, or production data were changed as part of deployment.
+- TypeScript lint (`npm run lint`) was not run by Vercel and remains a separate follow-up check. Existing non-blocking Vite config and large-chunk warnings remain.
