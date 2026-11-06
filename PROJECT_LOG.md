@@ -78,3 +78,11 @@
 - Verified `https://admin.nextborder.online/` returns HTTP 200 and serves the deployed app bundle `index-DHdaXQje.js` / `index-BWfdQoaO.css` from the new deployment.
 - No Supabase schema, RLS, secrets, or production data were changed as part of deployment.
 - TypeScript lint (`npm run lint`) was not run by Vercel and remains a separate follow-up check. Existing non-blocking Vite config and large-chunk warnings remain.
+
+## 2026-11-06 | Fix broken dashboard logo
+- User reported the logo was broken after production deployment.
+- Root cause confirmed: `NextBorderLogo.tsx` referenced `https://www.nextborder.online/nextborder-logo.svg`, which returned HTTP 404.
+- Confirmed the repository's existing `public/company-logo.png` is served successfully from production at `https://admin.nextborder.online/company-logo.png` (HTTP 200, image/png).
+- Updated `NextBorderLogo.tsx` to use the local same-origin asset `/company-logo.png`, removing dependency on the missing external SVG.
+- Fix commit: `fabcb59659f0137d09436d00b4527bf082a60170` on `nora/dashboard-working-fix`.
+- Next: build and deploy the logo correction; no other UI or database changes.
