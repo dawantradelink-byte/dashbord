@@ -14,7 +14,7 @@ export const NextBorderLogo: React.FC<NextBorderLogoProps> = ({
   return (
     <div className={`inline-flex items-center gap-3 select-none ${className}`}>
       <img
-        src="https://www.nextborder.online/nextborder-logo.svg"
+        src="/company-logo.png"
         alt="Next Border official logo"
         width={size}
         height={size}
