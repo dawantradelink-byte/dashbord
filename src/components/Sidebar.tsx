@@ -11,6 +11,7 @@ import {
   BookOpen, 
   UserCheck, 
   Layers, 
+  Mail,
   Settings, 
   ExternalLink,
   ChevronLeft,
@@ -28,6 +29,7 @@ export type NavTab =
   | 'Website Analytics'
   | 'AI Blog Inspector'
   | 'Blog Manager'
+  | 'Email Center'
   | 'Staff Management'
   | 'Pages'
   | 'Settings';
@@ -70,6 +72,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { id: 'Website Analytics', labelEn: 'Website Analytics', labelBn: 'ওয়েবসাইট অ্যানালিটিক্স', icon: BarChart3 },
     { id: 'AI Blog Inspector', labelEn: 'AI Blog Inspector', labelBn: 'এআই ব্লগ ইন্সপেক্টর', icon: Cpu },
     { id: 'Blog Manager', labelEn: 'Blog Manager', labelBn: 'ব্লগ ম্যানেজার', icon: BookOpen },
+    { id: 'Email Center', labelEn: 'Email Center', labelBn: 'ইমেইল সেন্টার', icon: Mail },
     { id: 'Staff Management', labelEn: 'Staff Management', labelBn: 'কর্মী ব্যবস্থাপনা', icon: UserCheck },
     { id: 'Pages', labelEn: 'Pages', labelBn: 'পেজ সমূহ', icon: Layers },
     { id: 'Settings', labelEn: 'Settings', labelBn: 'সেটিংস', icon: Settings }
