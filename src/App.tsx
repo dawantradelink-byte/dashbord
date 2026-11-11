@@ -32,6 +32,7 @@ import { BlogManagerView } from './components/views/BlogManagerView';
 import { StaffManagementView } from './components/views/StaffManagementView';
 import { PagesView } from './components/views/PagesView';
 import { SettingsView } from './components/views/SettingsView';
+import { EmailCenterView } from './components/views/EmailCenterView';
 
 import { INITIAL_LEADS } from './data/mockData';
 import { storageService } from './services/storageService';
@@ -311,6 +312,9 @@ function DashboardApp() {
 
       case 'Settings':
         return <SettingsView key="settings" language={language} onShowToast={addToast} />;
+
+      case 'Email Center':
+        return <EmailCenterView language={language} />;
 
       default:
         return null;
