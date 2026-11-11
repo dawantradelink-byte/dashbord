@@ -10,6 +10,7 @@ import {
   BookOpen, 
   UserCheck, 
   Settings,
+  Mail,
   Waves,
   Sparkles
 } from 'lucide-react';
@@ -50,6 +51,7 @@ export const UpperTabsBar: React.FC<UpperTabsBarProps> = ({
     { id: 'Visa Applications', labelEn: 'Visa Cases', labelBn: 'ভিসা আবেদন', icon: FileText },
     { id: 'Website Analytics', labelEn: 'Analytics', labelBn: 'অ্যানালিটিক্স', icon: BarChart3 },
     { id: 'Blog Manager', labelEn: 'Blog Hub', labelBn: 'ব্লগ হাব', icon: BookOpen },
+    { id: 'Email Center', labelEn: 'Email Center', labelBn: 'ইমেইল সেন্টার', icon: Mail },
     { id: 'Staff Management', labelEn: 'Staff', labelBn: 'কর্মী দল', icon: UserCheck },
     { id: 'Settings', labelEn: 'Settings', labelBn: 'সেটিংস', icon: Settings }
   ];
