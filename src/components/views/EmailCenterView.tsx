@@ -118,6 +118,9 @@ export function EmailCenterView({ language }: { language: 'en' | 'bn' }) {
   const [aiActions, setAiActions] = useState(['label-replies', 'update-sheets', 'gray-list']);
   const [campaignStarted, setCampaignStarted] = useState(false);
   const fileInput = useRef<HTMLInputElement>(null);
+  const attachmentInput = useRef<HTMLInputElement>(null);
+  const [attachments, setAttachments] = useState<File[]>([]);
+  const [draggingAttachments, setDraggingAttachments] = useState(false);
   const isBn = language === 'bn';
   const enabledSenders = senders.filter(s => s.enabled);
   const newReplies = replies.filter(r => r.status === 'New reply').length;
@@ -149,6 +152,27 @@ export function EmailCenterView({ language }: { language: 'en' | 'bn' }) {
     showToast(`${additions.length} file(s) added to this preview`);
   };
 
+  const addAttachments = (incoming: FileList | File[]) => {
+    const selected = Array.from(incoming);
+    if (!selected.length) return;
+    const MAX_FILE = 20 * 1024 * 1024;
+    const MAX_TOTAL = 25 * 1024 * 1024;
+    const accepted: File[] = [];
+    let rejected = 0;
+    for (const file of selected) {
+      if (file.size > MAX_FILE || file.size + attachments.reduce((n, f) => n + f.size, 0) + accepted.reduce((n, f) => n + f.size, 0) > MAX_TOTAL) {
+        rejected++;
+        continue;
+      }
+      if (!attachments.some(f => f.name === file.name && f.size === file.size && f.lastModified === file.lastModified) &&
+          !accepted.some(f => f.name === file.name && f.size === file.size && f.lastModified === file.lastModified)) accepted.push(file);
+    }
+    if (accepted.length) setAttachments(prev => [...prev, ...accepted]);
+    showToast(rejected ? `${accepted.length} attached · ${rejected} file(s) skipped (20 MB per file, 25 MB total limit).` : `${accepted.length} attachment(s) added.`);
+  };
+  const removeAttachment = (file: File) => setAttachments(prev => prev.filter(f => !(f.name === file.name && f.size === file.size && f.lastModified === file.lastModified)));
+  const attachmentSize = (bytes: number) => bytes < 1024 * 1024 ? `${Math.max(1, Math.round(bytes / 1024))} KB` : `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+
   const toggleAiAction = (id: string) => setAiActions(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
   const toggleSender = (id: string) => setSenders(prev => prev.map(s => s.id === id ? { ...s, enabled: !s.enabled } : s));
   const addFollowDay = () => setFollowDays(prev => [...prev, Math.max(1, (prev[prev.length - 1] || 0) + 7)]);
@@ -179,9 +203,13 @@ export function EmailCenterView({ language }: { language: 'en' | 'bn' }) {
   return (
     <div className="email-center space-y-5 text-white">
       <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');
+        .email-center { font-family: 'Manrope', ui-sans-serif, system-ui, sans-serif; font-feature-settings: 'ss01' on, 'cv11' on; }
         .email-center button { transition: transform 320ms cubic-bezier(.34,1.56,.64,1), filter 180ms ease, background-color 180ms ease, border-color 180ms ease; transform-origin: center; }
         .email-center button:active { transform: scale(.95); }
-        .email-center button:focus-visible { outline: 2px solid rgba(252,211,77,.8); outline-offset: 3px; }
+        .email-center button:focus-visible, .email-center input:focus-visible, .email-center textarea:focus-visible, .email-center select:focus-visible { outline: 2px solid rgba(252,211,77,.8); outline-offset: 3px; }
+        .email-center input, .email-center textarea, .email-center select { font-family: inherit; }
+        .email-center ::selection { background: rgba(251,191,36,.28); color: #fff; }
         @media (prefers-reduced-motion: reduce) { .email-center button { transition: none; } .email-center button:active { transform: none; } }
       `}</style>
 
@@ -287,15 +315,31 @@ export function EmailCenterView({ language }: { language: 'en' | 'bn' }) {
         </Panel>
       </div> : null}
 
-      {section === 'Compose' ? <Panel className="mx-auto max-w-5xl">
-        <div className="flex flex-wrap items-center justify-between gap-3"><div><h3 className="text-sm font-semibold">Compose email</h3><p className="mt-1 text-[10px] text-rose-100/40">A familiar inbox-style composer for one-to-one messages.</p></div>{statusPill('Mailbox not connected')}</div>
-        <div className="mt-5 space-y-3">
-          <div className="flex items-center gap-3 border-b border-white/[.07] pb-3"><span className="w-14 text-[10px] text-rose-100/40">From</span><select value={composeFrom} onChange={e => setComposeFrom(e.target.value)} className="h-9 flex-1 bg-transparent text-xs text-white outline-none">{senders.map(s => <option key={s.id} value={s.email} className="bg-[#170b11]">{s.email}{s.enabled ? '' : ' (disabled)'}</option>)}</select></div>
-          <div className="flex items-center gap-3 border-b border-white/[.07] pb-3"><span className="w-14 text-[10px] text-rose-100/40">To</span><input value={composeTo} onChange={e => setComposeTo(e.target.value)} placeholder="name@example.com" className="h-9 flex-1 bg-transparent text-xs outline-none placeholder:text-rose-100/25" /><button type="button" onClick={() => setShowCc(v => !v)} className="text-[9px] text-amber-100/65 hover:text-amber-100">{showCc ? 'Hide Cc' : 'Cc'}</button></div>
-          {showCc ? <div className="flex items-center gap-3 border-b border-white/[.07] pb-3"><span className="w-14 text-[10px] text-rose-100/40">Cc</span><input value={composeCc} onChange={e => setComposeCc(e.target.value)} placeholder="copy@example.com" className="h-9 flex-1 bg-transparent text-xs outline-none placeholder:text-rose-100/25" /></div> : null}
-          <div className="flex items-center gap-3 border-b border-white/[.07] pb-3"><span className="w-14 text-[10px] text-rose-100/40">Subject</span><input value={composeSubject} onChange={e => setComposeSubject(e.target.value)} placeholder="Write a clear subject" className="h-9 flex-1 bg-transparent text-xs outline-none placeholder:text-rose-100/25" /></div>
-          <textarea value={composeBody} onChange={e => setComposeBody(e.target.value)} rows={13} placeholder="Write your message..." className="min-h-64 w-full resize-y rounded-xl border border-white/[.07] bg-black/20 p-4 text-xs leading-6 text-white outline-none placeholder:text-rose-100/25 focus:border-amber-200/30" />
-          <div className="flex flex-wrap items-center justify-between gap-3"><div className="flex items-center gap-2 text-[9px] text-rose-100/35"><Paperclip className="h-3.5 w-3.5" /> Attachments and signature will be connected with the mailbox service.</div><div className="flex flex-wrap gap-2"><ActionButton kind="secondary" onClick={saveDraft}>Save draft</ActionButton><ActionButton onClick={sendManual}><Send className="h-3.5 w-3.5" /> Send email</ActionButton></div></div>
+      {section === 'Compose' ? <Panel className="mx-auto max-w-5xl !p-0">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/[.08] px-5 py-5 sm:px-7"><div><h3 className="text-lg font-bold tracking-[-.035em]">Compose email</h3><p className="mt-1 text-xs text-rose-100/50">A calmer, familiar space for one-to-one messages.</p></div>{statusPill('Preview · Mailbox not connected')}</div>
+        <div className="px-5 py-5 sm:px-7">
+          <div className="space-y-0">
+            <div className="flex min-h-12 items-center gap-4 border-b border-white/[.07]"><label htmlFor="compose-from" className="w-14 shrink-0 text-xs font-semibold text-rose-100/55">From</label><select id="compose-from" value={composeFrom} onChange={e => setComposeFrom(e.target.value)} className="h-11 min-w-0 flex-1 bg-transparent text-sm text-white outline-none">{senders.map(s => <option key={s.id} value={s.email} className="bg-[#170b11]">{s.email}{s.enabled ? '' : ' (disabled)'}</option>)}</select></div>
+            <div className="flex min-h-12 items-center gap-4 border-b border-white/[.07]"><label htmlFor="compose-to" className="w-14 shrink-0 text-xs font-semibold text-rose-100/55">To</label><input id="compose-to" value={composeTo} onChange={e => setComposeTo(e.target.value)} placeholder="name@example.com" className="h-11 min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-rose-100/30" /><button type="button" onClick={() => setShowCc(v => !v)} className="text-xs font-semibold text-amber-100/75 hover:text-amber-100">{showCc ? 'Hide Cc' : 'Cc'}</button></div>
+            {showCc ? <div className="flex min-h-12 items-center gap-4 border-b border-white/[.07]"><label htmlFor="compose-cc" className="w-14 shrink-0 text-xs font-semibold text-rose-100/55">Cc</label><input id="compose-cc" value={composeCc} onChange={e => setComposeCc(e.target.value)} placeholder="copy@example.com" className="h-11 min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-rose-100/30" /></div> : null}
+            <div className="flex min-h-12 items-center gap-4 border-b border-white/[.07]"><label htmlFor="compose-subject" className="w-14 shrink-0 text-xs font-semibold text-rose-100/55">Subject</label><input id="compose-subject" value={composeSubject} onChange={e => setComposeSubject(e.target.value)} placeholder="Write a clear subject" className="h-11 min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-rose-100/30" /></div>
+          </div>
+          <textarea aria-label="Email message" value={composeBody} onChange={e => setComposeBody(e.target.value)} rows={13} placeholder="Write your message..." className="mt-5 min-h-64 w-full resize-y rounded-2xl border border-white/[.08] bg-[#10080d]/70 p-5 text-sm leading-7 text-white outline-none placeholder:text-rose-100/30 focus:border-amber-200/30" />
+          <input ref={attachmentInput} type="file" multiple className="hidden" accept=".pdf,.csv,.xlsx,.xls,.ods,.doc,.docx,.txt,.png,.jpg,.jpeg,.webp" onChange={e => { if (e.target.files) addAttachments(e.target.files); e.currentTarget.value = ''; }} />
+          <div
+            onDragOver={e => { e.preventDefault(); setDraggingAttachments(true); }}
+            onDragLeave={e => { if (!e.currentTarget.contains(e.relatedTarget as Node)) setDraggingAttachments(false); }}
+            onDrop={e => { e.preventDefault(); setDraggingAttachments(false); addAttachments(e.dataTransfer.files); }}
+            className={cx('mt-4 rounded-2xl border border-dashed p-4 transition-colors', draggingAttachments ? 'border-amber-200/60 bg-amber-200/[.08]' : 'border-white/15 bg-black/15')}
+          >
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-center gap-3"><span className="grid h-10 w-10 place-items-center rounded-xl border border-amber-200/15 bg-amber-200/[.07] text-amber-200"><Paperclip className="h-4 w-4" /></span><div><p className="text-sm font-semibold text-white">Attachments</p><p className="mt-1 text-xs text-rose-100/45">Drop files here or browse. Up to 20 MB per file, 25 MB total.</p></div></div>
+              <ActionButton kind="secondary" onClick={() => attachmentInput.current?.click()}><Upload className="h-3.5 w-3.5" /> Add files</ActionButton>
+            </div>
+            {attachments.length ? <div className="mt-4 grid gap-2 sm:grid-cols-2">{attachments.map((file, index) => <div key={`${file.name}-${file.size}-${file.lastModified}-${index}`} className="flex min-w-0 items-center gap-3 rounded-xl border border-white/[.08] bg-white/[.035] px-3 py-2.5"><span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-amber-200/[.08] text-amber-200">{/\.(xlsx?|ods|csv)$/i.test(file.name) ? <FileSpreadsheet className="h-4 w-4" /> : <FileText className="h-4 w-4" />}</span><span className="min-w-0 flex-1"><span className="block truncate text-xs font-semibold text-white">{file.name}</span><span className="mt-0.5 block text-[11px] text-rose-100/45">{attachmentSize(file.size)}</span></span><button type="button" aria-label={`Remove ${file.name}`} onClick={() => removeAttachment(file)} className="rounded-lg p-2 text-rose-100/45 hover:bg-red-400/10 hover:text-red-200"><Trash2 className="h-4 w-4" /></button></div>)}</div> : <p className="mt-3 text-xs text-rose-100/35">No files attached yet.</p>}
+            <p className="mt-3 text-[11px] leading-5 text-amber-100/55">Files are selected in this browser preview only. They are not uploaded or sent until a mailbox service is connected.</p>
+          </div>
+          <div className="mt-5 flex flex-col-reverse gap-3 border-t border-white/[.08] pt-5 sm:flex-row sm:items-center sm:justify-between"><div className="text-xs text-rose-100/45">{attachments.length ? `${attachments.length} file(s) · ${attachmentSize(attachments.reduce((n, f) => n + f.size, 0))}` : 'Ready to compose'}</div><div className="flex flex-wrap gap-2"><ActionButton kind="secondary" onClick={saveDraft}>Save draft</ActionButton><ActionButton onClick={sendManual}><Send className="h-3.5 w-3.5" /> Send email</ActionButton></div></div>
         </div>
       </Panel> : null}
 
