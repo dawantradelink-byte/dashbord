@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import {
-  Activity, ArrowDownRight, ArrowUpRight, Bell, CheckCircle2, ChevronRight,
-  CircleHelp, Clock3, Contact, Filter, Inbox, Mail, MoreHorizontal, Plus,
+  Activity, CheckCircle2, ChevronRight, CircleHelp, Clock3, Contact, Filter,
+  Inbox, Mail, Plus,
   Search, Send, ShieldCheck, Sparkles, Users, Workflow, Zap
 } from 'lucide-react';
 
